@@ -8,6 +8,7 @@ import models.Activities;
 import models.Athlete;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import play.Logger;
 import play.libs.WS;
@@ -85,6 +86,10 @@ public class Application extends Controller {
     	return Activities.activities;
     }
     
+    public static Result getStatistics(){
+    	getAthleteActivities(session("token"));
+    	return ok(Activities.getStatistics());
+    }
     private static String getSecondsSinceUnixEpoch(){return getSecondsSinceUnixEpoch(null);}
     private static String getSecondsSinceUnixEpoch(Date date){
     	Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
