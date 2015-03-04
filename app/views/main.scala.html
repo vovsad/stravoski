@@ -1,0 +1,34 @@
+@(title: String, message: String)(content: Html)
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@title</title>
+    <link rel='shortcut icon' type='image/png' href='@routes.Assets.at("images/favicon.png")'>
+    <link rel='stylesheet' href='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap.min.css"))'>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css">
+    <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("jquery.min.js"))'></script>
+    <script src="//code.jquery.com/ui/1.11.3/jquery-ui.js"></script>
+    <style>
+    body {
+        margin-top: 50px;
+    }
+    </style>
+	 <script>
+	$(function() {
+	$( "#datepicker" ).datepicker();
+	});
+	</script>
+</head>
+<body>
+    <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+            <div class="container-fluid">
+                <a id="titleLink" class="brand" href="/">@title :: @message</a>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        @content
+    </div>
+</body>
+</html>

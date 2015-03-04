@@ -1,0 +1,69 @@
+@(message: String, isAuthenticated: Boolean)
+
+
+@main("Stravoski", message) {
+	@if(!isAuthenticated){
+    
+    <h1>Authorize Strava API Sample to connect to your account</h1>
+    <p>By authorizing an application you are still under Strava's Terms of Service</p>
+    
+	<p>Amongst other things, this application will be able to:</p>
+	<ul>
+		<li>Access your name, location and email address</li>
+		<li>Access your activity data</li>
+		<li>Display public data related to those activities</li>
+		<li>Read your public profile data</li>
+	</ul>
+	
+	<p>This application will not be able to:</p>
+	
+	<ul>
+		<li>Upload activities for you</li>
+		<li>See private data on your activities</li>
+		<li>Post comments or kudos for you</li>
+		<li>Change your profile information</li>
+	</ul>
+
+	<div class="form-group">
+		<button id="logInWithStrava" class="form-control"><img alt="LogInWithStrava" src="/assets/images/LogInWithStrava@@2x.png">
+		</button>
+	</div>
+	<script type="text/javascript">
+	    document.getElementById("logInWithStrava").onclick = function () {
+        	location.href = "https://www.strava.com/oauth/authorize?client_id=1455&redirect_uri=http://localhost:9000/tokenexchange&response_type=code";
+    	};
+	</script>
+	} else {
+		<h1>Ski activities</h1>
+		
+		<div class="form-group">
+		<label>From Date</label>
+		<input type="text" id="datepicker" title="From Date" placeholder="12/1/2014" value="12/1/2014">
+		<label>To Date</label>
+		<input type="text" id="datepicker" title="To Date" placeholder="4/30/2015" value="4/30/2015">
+		</div>
+		
+		<div class="table-responsive">
+		    <table class="table table-striped">
+		        <thead>
+    				<tr>
+        				<th>Name</th>
+        				<th>Date</th>
+        				<th>Length</th>
+    				</tr>
+				</thead>
+				<tbody>
+				@for(activity <- Activities.skiActivitiesAsList()){
+    				<tr>
+    					<td>@activity.findValue("start_date")</td>
+    					<td>@activity.findValue("name")</td>
+    					<td>@activity.findValue("distance")</td>
+    				</tr>
+    				}
+		        </tbody>
+		    </table>
+		</div>
+		
+		}
+
+}
