@@ -23,26 +23,55 @@
 		<li>Post comments or kudos for you</li>
 		<li>Change your profile information</li>
 	</ul>
+	
+<form class="form-vertical">
+  <fieldset>
+    <legend>Continue with login</legend>
 
 	<div class="form-group">
-		<button id="logInWithStrava" class="form-control"><img alt="LogInWithStrava" src="/assets/images/LogInWithStrava@@2x.png">
+		<button id="logInWithStrava" class="btn btn-primary btn-lg">
+			<img alt="LogInWithStrava" src="/assets/images/LogInWithStrava@@2x.png">
 		</button>
 	</div>
+	</fieldset>
+	</form>
 	<script type="text/javascript">
-	    document.getElementById("logInWithStrava").onclick = function () {
-        	location.href = "https://www.strava.com/oauth/authorize?client_id=1455&redirect_uri=http://localhost:9000/tokenexchange&response_type=code";
-    	};
+		document.getElementById("logInWithStrava").onclick = function() {
+			location.href = "https://www.strava.com/oauth/authorize?client_id=1455&redirect_uri=http://localhost:9000/tokenexchange&response_type=code";
+			return false;
+			};
 	</script>
 	} else {
+	
+<div class="container">
+
 		<h1>Ski activities</h1>
-		
-		<div class="form-group">
-		<label>From Date</label>
-		<input type="text" id="datepicker" title="From Date" placeholder="12/1/2014" value="12/1/2014">
-		<label>To Date</label>
-		<input type="text" id="datepicker" title="To Date" placeholder="4/30/2015" value="4/30/2015">
-		</div>
-		
+
+	    <div class="row">
+        <div class="col-md-4"><legend>Athlete</legend></div>
+        <div class="col-md-4"><legend>Statistics</legend></div>
+        <div class="col-md-4">
+        
+<form class="form-horizontal">
+  <fieldset>
+    <legend>Filter Dates</legend>
+    <div class="form-group">
+      <label for="datepicker" class="col-lg-2 control-label">Winter season</label>
+      <div class="col-lg-10">
+        <select class="form-control" name="selectWinterSeason" id="selectWinterSeason" onchange="this.form.submit();">
+          <option>1/10/2014-4/30/2015</option>
+          <option>1/10/2013-4/30/2014</option>
+          <option>1/10/2012-4/30/2013</option>
+          <option>1/10/2011-4/30/2012</option>
+        </select>
+      </div>
+    </div>
+  </fieldset>
+</form>
+
+	</div>
+</div>
+	    <div class="row">
 		<div class="table-responsive">
 		    <table class="table table-striped">
 		        <thead>
@@ -63,6 +92,15 @@
 		        </tbody>
 		    </table>
 		</div>
+
+	    </div>
+    <hr></hr>
+    <footer></footer>
+
+</div>
+	
+		
+		
 		
 		}
 

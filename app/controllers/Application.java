@@ -1,9 +1,11 @@
 package controllers;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 
 import models.Activities;
+import models.Athlete;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -15,28 +17,18 @@ import play.mvc.Controller;
 import play.mvc.Result;
 
 public class Application extends Controller {
-	public static JsonNode athlete;
     	
     public static Result index() {
+    	if (session("token") != null) 
+    		return redirect("/dashboard");
         return ok(views.html.index.render("Authorize Strava API Sample to connect to your account", Boolean.FALSE));
     }
     
-    public static Result dashboard(String code)
+    public static Result tokenExchange(String code)
     {
-    	athlete = getAthlete(code).get(10000);
-    	Logger.debug("athlete :: " + athlete.toString());
-    	Activities.activities = getAthleteActivities(athlete.findValue("access_token").asText()).get(10000);
-    	Logger.debug("activities :: " + Activities.activities.toString());
-    	Logger.debug("seconds :: " + getSecondsSinceUnixEpoch());
-    	return ok(views.html.index.render("You are authorized as " + 
-    	athlete.findValue("firstname").asText() + " " + 
-    			athlete.findValue("lastname").asText(), 
-    			Boolean.TRUE));
-    }
-
-    //Client Secret:	22122cf967940aa0d142f51ca987b878aba948eb 
-    public static Promise<JsonNode> getAthlete(String code) {
-        return WS.url("https://www.strava.com/oauth/token")
+    	Logger.debug("getAthlete");
+    	if (Athlete.athlete == null) 
+    		Athlete.athlete = WS.url("https://www.strava.com/oauth/token")
         		.setContentType("application/x-www-form-urlencoded")
         		.post("client_id=" + 1455 + 
         				"&client_secret=" + "22122cf967940aa0d142f51ca987b878aba948eb" + 
@@ -45,14 +37,42 @@ public class Application extends Controller {
 					public JsonNode apply(WS.Response response) {
 						return response.asJson();
 					}
-				});
+				}).get(10000);
+    	
+    	session("token", Athlete.athlete.findValue("access_token").asText());
+    	
+    	return redirect("/dashboard");
+    }
+    
+    public static Result dashboard()
+    {
+    	getAthlete(session("token"));
+    	getAthleteActivities(session("token"));
+    	
+    	return ok(views.html.index.render("You are authorized as " + 
+    	Athlete.athlete.findValue("firstname").asText() + " " + 
+    	Athlete.athlete.findValue("lastname").asText(), 
+    			Boolean.TRUE));
     }
 
-    public static Promise<JsonNode> getAthleteActivities(String access_token) {
-    	Logger.debug("url :: " + "http://www.strava.com/api/v3/athlete/activities?" +
-        		"after=" + getSecondsSinceUnixEpoch() +
-				"&access_token=" + access_token);
-		return WS.url("http://www.strava.com/api/v3/athlete/activities")
+    //Client Secret:	22122cf967940aa0d142f51ca987b878aba948eb 
+    public static JsonNode getAthlete(String access_token) {
+    	if (Athlete.athlete == null) 
+    		Athlete.athlete = WS.url("https://www.strava.com//api/v3/athlete")
+    			.setQueryParameter("access_token", access_token)
+        		.get()
+        		.map(new Function<WS.Response, JsonNode>() {
+					public JsonNode apply(WS.Response response) {
+						return response.asJson();
+					}
+				}).get(10000);
+
+    	return Athlete.athlete;
+    }
+
+    public static JsonNode getAthleteActivities(String access_token) {
+    	if(Activities.activities == null)
+    		Activities.activities = WS.url("http://www.strava.com/api/v3/athlete/activities")
 				.setQueryParameter("after", getSecondsSinceUnixEpoch())
 				.setQueryParameter("access_token", access_token)
         		.get()
@@ -61,10 +81,12 @@ public class Application extends Controller {
 						Logger.debug("response :: " + response.getBody());
 						return response.asJson();
 					}
-				});
+				}).get(10000);
+    	return Activities.activities;
     }
     
-    private static String getSecondsSinceUnixEpoch(){
+    private static String getSecondsSinceUnixEpoch(){return getSecondsSinceUnixEpoch(null);}
+    private static String getSecondsSinceUnixEpoch(Date date){
     	Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
     	calendar.clear();
     	calendar.set(2014, Calendar.DECEMBER, 1);

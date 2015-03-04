@@ -13,6 +13,8 @@ public class Activities {
 	public static JsonNode activities;
 	
 	public static List<JsonNode> skiActivitiesAsList(){
+		if (activities == null) return new LinkedList();
+		
 		LinkedList<JsonNode> list = new LinkedList();
 		for (Iterator<JsonNode> i = activities.iterator(); i.hasNext();) {
 			JsonNode node = i.next();
