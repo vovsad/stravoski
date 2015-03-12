@@ -48,8 +48,14 @@
 		<h1>Ski activities</h1>
 
 	    <div class="row">
-        <div class="col-md-4"><legend>Athlete</legend></div>
-        <div class="col-md-4"><legend>Statistics</legend></div>
+        <div class="col-md-4"></div>
+        <div class="col-md-4">
+        	<legend>Statistics</legend>
+        	<p>@Activities.getSkiActivitiesDays() ski days in season</p>
+        	<p>@Activities.getSkiSeasonTotalDistanceInKm() km skied in season</p>
+        	<p>Longest riding day is @Activities.getSkiSeasonLongestRideInKm() km</p>
+        	
+        </div>
         <div class="col-md-4">
         
 <form class="form-horizontal">
@@ -72,21 +78,22 @@
 	</div>
 </div>
 	    <div class="row">
+	    <h2>Season details</h2>
 		<div class="table-responsive">
 		    <table class="table table-striped">
 		        <thead>
     				<tr>
-        				<th>Name</th>
         				<th>Date</th>
-        				<th>Length</th>
+        				<th>Name</th>
+        				<th>Length, km</th>
     				</tr>
 				</thead>
 				<tbody>
-				@for(activity <- Activities.skiActivitiesAsList()){
+				@for(activity <- Activities.filterToSkiActivities().elements()){
     				<tr>
     					<td>@activity.findValue("start_date")</td>
     					<td>@activity.findValue("name")</td>
-    					<td>@activity.findValue("distance")</td>
+    					<td>@{activity.findValue("distance").asInt()/1000}</td>
     				</tr>
     				}
 		        </tbody>

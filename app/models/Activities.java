@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class Activities {
 	public static JsonNode activities;
 
-	private static JsonNode filterToSkiActivities() {
+	public static JsonNode filterToSkiActivities() {
 		if (activities == null)
 			return null;
 		ArrayNode skiActivities = JsonNodeFactory.instance.arrayNode();
@@ -37,17 +37,17 @@ public class Activities {
 
 	}
 
-	public static List<JsonNode> skiActivitiesAsList() {
-		if (activities == null)
-			return new LinkedList<JsonNode>();
-
-		LinkedList<JsonNode> onlySkiActivities = new LinkedList<JsonNode>();
-		for (Iterator<JsonNode> i = filterToSkiActivities().iterator(); i
-				.hasNext();)
-			onlySkiActivities.add(i.next());
-
-		return onlySkiActivities;
-	}
+//	public static List<JsonNode> skiActivitiesAsList() {
+//		if (activities == null)
+//			return new LinkedList<JsonNode>();
+//
+//		LinkedList<JsonNode> onlySkiActivities = new LinkedList<JsonNode>();
+//		for (Iterator<JsonNode> i = filterToSkiActivities().iterator(); i
+//				.hasNext();)
+//			onlySkiActivities.add(i.next());
+//
+//		return onlySkiActivities;
+//	}
 
 	public static ObjectNode getStatistics() {
 
@@ -63,7 +63,7 @@ public class Activities {
 		return statistics;
 	}
 
-	private static int getSkiActivitiesDays() {
+	public static int getSkiActivitiesDays() {
 		if (activities == null)
 			return 0;
 
@@ -77,14 +77,14 @@ public class Activities {
 				.size();
 	}
 
-	private static int getSkiActivitiesCount() {
+	public static int getSkiActivitiesCount() {
 		if (activities == null)
 			return 0;
 
 		return filterToSkiActivities().size();
 	}
 
-	private static int getSkiSeasonTotalDistanceInKm() {
+	public static int getSkiSeasonTotalDistanceInKm() {
 		if (activities == null)
 			return 0;
 
@@ -96,7 +96,7 @@ public class Activities {
 		return totalDistance / 1000;
 	}
 
-	private static int getSkiSeasonLongestRideInKm() {
+	public static int getSkiSeasonLongestRideInKm() {
 		if (activities == null)
 			return 0;
 
