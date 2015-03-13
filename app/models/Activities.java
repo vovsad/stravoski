@@ -45,10 +45,10 @@ public class Activities {
 			return Json.newObject();
 		ObjectNode statistics = Json.newObject();
 
-		statistics.put("Count", getSkiActivitiesCount());
-		statistics.put("Total Skiing Days", getSkiActivitiesDays());
-		statistics.put("Total Distance", getSkiSeasonTotalDistanceInKm());
-		statistics.put("Max Skiing Day", getSkiSeasonLongestRideInKm());
+		statistics.put("count", getSkiActivitiesCount());
+		statistics.put("total_skiing_days", getSkiActivitiesDays());
+		statistics.put("total_distance", getSkiSeasonTotalDistanceInKm());
+		statistics.put("max_skiing_day", getSkiSeasonLongestRideInKm());
 
 		return statistics;
 	}

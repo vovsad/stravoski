@@ -85,10 +85,11 @@ public class Application extends Controller {
 
 			Activities.season = season;
 			Activities.activities = WS
-					.url("http://www.strava.com/api/v3/athlete/activities")
+					.url("https://www.strava.com/api/v3/athlete/activities")
 					.setQueryParameter("after", getAfter(season))
 					.setQueryParameter("before", getBefore(season))
-					.setQueryParameter("access_token", access_token).get()
+					.setQueryParameter("access_token", access_token)
+					.get()
 					.map(new Function<WS.Response, JsonNode>() {
 						public JsonNode apply(WS.Response response) {
 							return response.asJson();
@@ -103,10 +104,10 @@ public class Application extends Controller {
 		return ok(Activities.getStatistics());
 	}
 
-	public static Result getActivityStream(String access_token, String id) {
-		// TODO: Complete
-		return WS.url("http://www.strava.com/api/v3/athlete/activities")
-				.setQueryParameter("access_token", access_token).get()
+	public static Result getActivityDetails(String id) {
+		return WS.url("https://www.strava.com/api/v3/activities/"+id)
+				.setQueryParameter("access_token", session("token"))
+				.get()
 				.map(new Function<WS.Response, Result>() {
 					public Result apply(WS.Response response) {
 						return ok(response.asJson());
