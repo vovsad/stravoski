@@ -1,5 +1,6 @@
 package models;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,6 +22,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 @Entity
 public class Activities {
 	public static JsonNode activities;
+	public static String season = Seasons.season1415;
 
 	public static JsonNode filterToSkiActivities() {
 		if (activities == null)
@@ -36,18 +38,6 @@ public class Activities {
 		return skiActivities;
 
 	}
-
-//	public static List<JsonNode> skiActivitiesAsList() {
-//		if (activities == null)
-//			return new LinkedList<JsonNode>();
-//
-//		LinkedList<JsonNode> onlySkiActivities = new LinkedList<JsonNode>();
-//		for (Iterator<JsonNode> i = filterToSkiActivities().iterator(); i
-//				.hasNext();)
-//			onlySkiActivities.add(i.next());
-//
-//		return onlySkiActivities;
-//	}
 
 	public static ObjectNode getStatistics() {
 

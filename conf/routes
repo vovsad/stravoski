@@ -9,6 +9,6 @@ GET     /assets/*file               controllers.Assets.at(path="/public", file)
 GET     /webjars/*file              controllers.WebJarAssets.at(file)
 
 #Strava login
-GET     /dashboard				controllers.Application.dashboard()
+GET     /dashboard				controllers.Application.dashboard(season ?= null)
 GET     /tokenexchange				controllers.Application.tokenExchange(code)
 GET     /statistics				controllers.Application.getStatistics()

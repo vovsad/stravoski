@@ -53,7 +53,7 @@
         	<legend>Statistics</legend>
         	<p>@Activities.getSkiActivitiesDays() ski days in season</p>
         	<p>@Activities.getSkiSeasonTotalDistanceInKm() km skied in season</p>
-        	<p>Longest riding day is @Activities.getSkiSeasonLongestRideInKm() km</p>
+        	<p>Longest riding day was @Activities.getSkiSeasonLongestRideInKm() km</p>
         	
         </div>
         <div class="col-md-4">
@@ -64,11 +64,11 @@
     <div class="form-group">
       <label for="datepicker" class="col-lg-2 control-label">Winter season</label>
       <div class="col-lg-10">
-        <select class="form-control" name="selectWinterSeason" id="selectWinterSeason" onchange="this.form.submit();">
-          <option>1/10/2014-4/30/2015</option>
-          <option>1/10/2013-4/30/2014</option>
-          <option>1/10/2012-4/30/2013</option>
-          <option>1/10/2011-4/30/2012</option>
+        <select class="form-control" name="season" id="season" onchange="this.form.submit();">
+          <option @if(Activities.season.equals(Seasons.season1415)){ selected="selected"}>@Seasons.season1415</option>
+          <option @if(Activities.season.equals(Seasons.season1314)){ selected="selected"}>@Seasons.season1314</option>
+          <option @if(Activities.season.equals(Seasons.season1213)){ selected="selected"}>@Seasons.season1213</option>
+          <option @if(Activities.season.equals(Seasons.season1112)){ selected="selected"}>@Seasons.season1112</option>
         </select>
       </div>
     </div>
@@ -85,6 +85,7 @@
     				<tr>
         				<th>Date</th>
         				<th>Name</th>
+        				<th>Location</th>
         				<th>Length, km</th>
     				</tr>
 				</thead>
@@ -93,6 +94,7 @@
     				<tr>
     					<td>@activity.findValue("start_date")</td>
     					<td>@activity.findValue("name")</td>
+    					<td>@activity.findValue("location_city")</td>
     					<td>@{activity.findValue("distance").asInt()/1000}</td>
     				</tr>
     				}
