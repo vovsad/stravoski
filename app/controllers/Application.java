@@ -56,14 +56,16 @@ public class Application extends Controller {
 
 	public static Result dashboard(String season) throws ParseException {
 		if (season == null) {
-			season = Seasons.season1415;
+			Activities.season = Seasons.season1415;
+		}else{
+			Activities.season = season;
 		}
 		if (((List<JsonNode>)Cache.get("Activities")) == null) {
 			Cache.set("Activities", new LinkedList<JsonNode>());
 		}
 		
 		getAthlete(session("token"));
-		getAthleteActivities(session("token"), season);
+		getAthleteActivities(session("token"));
 
 		return ok(views.html.index.render("You are authorized as "
 				+ Athlete.athlete.findValue("firstname").asText() + " "
@@ -84,15 +86,13 @@ public class Application extends Controller {
 		return Athlete.athlete;
 	}
 
-	public static List<JsonNode> getAthleteActivities(String access_token,
-			String season) {
+	public static List<JsonNode> getAthleteActivities(String access_token) {
 		
 		Logger.debug("((List<JsonNode>) Cache.get(\"Activities\")).isEmpty()" + ((List<JsonNode>) Cache.get("Activities")).isEmpty());
 
 		if (((List<JsonNode>) Cache.get("Activities")).isEmpty()) {
-			Activities.season = season;
 			WS.url("https://www.strava.com/api/v3/athlete/activities")
-					.setQueryParameter("before", getBefore(season))
+//					.setQueryParameter("before", getBefore(season))
 					.setQueryParameter("access_token", access_token)
 					.get()
 					.map(new Function<WS.Response, JsonNode>() {
@@ -124,7 +124,7 @@ public class Application extends Controller {
 	}
 
 	private static void cacheAthleteActivities(String token, String before) {
-		//Logger.debug("In cacheAthleteActivities for dates before " + before);
+		Logger.debug("In cacheAthleteActivities for dates before " + before);
 		WS.url("https://www.strava.com/api/v3/athlete/activities")
 				.setQueryParameter("before", before)
 				.setQueryParameter("access_token", token)
@@ -141,6 +141,7 @@ public class Application extends Controller {
 					Cache.set("Activities", a);
 				});
 		Logger.debug( "Activities size in Cache is " + ((List<JsonNode>)Cache.get("Activities")).size());
+		Logger.debug( "before.equals(getLastCachedActivityDate() " + before + " " +getLastCachedActivityDate());
 		
 		if(!before.equals(getLastCachedActivityDate()))
 			cacheAthleteActivities(token, getLastCachedActivityDate());
@@ -164,32 +165,6 @@ public class Application extends Controller {
 
 	}
 
-	private static String getAfter(String season) {
-		final DateFormat format = new SimpleDateFormat("dd/MM/yyyy");
-
-		try {
-			return Long
-					.toString(format.parse(season.split("-")[0]).getTime() / 1000);
-		} catch (ParseException e) {
-			Logger.error("Cannot parse date from season " + season);
-			return null;
-		}
-
-	}
-
-	private static String getBefore(String season) {
-		final DateFormat format = new SimpleDateFormat("dd/MM/yyyy");
-
-		try {
-			return Long
-					.toString(format.parse(season.split("-")[1]).getTime() / 1000);
-		} catch (ParseException e) {
-			Logger.error("Cannot parse date from season " + season);
-			return null;
-		}
-
-	}
-	
 	private static String getLastCachedActivityDate() {
 		final String startdate = ((List<JsonNode>) Cache.get("Activities")).get(
 				((List<JsonNode>) Cache.get("Activities")).size() - 1)

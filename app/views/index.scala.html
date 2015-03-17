@@ -89,7 +89,7 @@
     				</tr>
 				</thead>
 				<tbody>
-				@for(activity <- Activities.filterToSkiActivities().elements()){
+				@for(activity <- Activities.filterToSelectedDates().elements()){
     				<tr data-toggle="modal" data-target="#activityModalInfo" data-activityid="@activity.findValue("id")">
     					<td>@activity.findValue("start_date")</td>
     					<td>@activity.findValue("name")</td>

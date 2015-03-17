@@ -1,5 +1,8 @@
 package models;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -36,6 +39,21 @@ public class Activities {
 		});
 
 		return skiActivities;
+
+	}
+	
+	public static JsonNode filterToSelectedDates() {
+		
+		ArrayNode filteredActivities = JsonNodeFactory.instance.arrayNode(); 
+				
+		filterToSkiActivities().forEach((activity) -> {
+			if (getTo(season) > getActivityDate(activity) && 
+					getActivityDate(activity) > getFrom(season)){
+				filteredActivities.add(activity);
+			}
+		});
+
+		return filteredActivities;
 
 	}
 
@@ -86,6 +104,45 @@ public class Activities {
 		}
 		
 		return maxDistance / 1000;
+	}
+	
+	private static Long getFrom(String season) {
+		final DateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+
+		try {
+			return format.parse(season.split("-")[0]).getTime() / 1000;
+		} catch (ParseException e) {
+			Logger.error("Cannot parse date from season " + season);
+			return null;
+		}
+
+	}
+
+	private static Long getTo(String season) {
+		final DateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+
+		try {
+			return format.parse(season.split("-")[1]).getTime() / 1000;
+		} catch (ParseException e) {
+			Logger.error("Cannot parse date from season " + season);
+			return null;
+		}
+
+	}
+	
+	private static Long getActivityDate(JsonNode activity) {
+		final DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+		
+		try {
+			return format.parse(
+						activity.findValue("start_date").asText()
+						.substring(0, 10)).getTime() / 1000;
+		} catch (ParseException e) {
+			Logger.error("Cannot parse date from Strava date " + 
+					activity.findValue("start_date").asText());
+			return null;
+		}
+
 	}
 
 }
