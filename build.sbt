@@ -5,6 +5,7 @@ name := """stravoski"""
 version := "1.0-SNAPSHOT"
 
 libraryDependencies ++= Seq(
+	cache,
 	javaJdbc,
 	javaJpa,
 	"org.hibernate" % "hibernate-entitymanager" % "3.6.9.Final",

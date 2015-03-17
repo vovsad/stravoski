@@ -5,6 +5,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.TimeZone;
 
 import models.Activities;
@@ -20,6 +22,7 @@ import play.libs.F.Function;
 import play.libs.F.Promise;
 import play.mvc.Controller;
 import play.mvc.Result;
+import play.cache.Cache;
 
 public class Application extends Controller {
 
@@ -54,9 +57,11 @@ public class Application extends Controller {
 	public static Result dashboard(String season) throws ParseException {
 		if (season == null) {
 			season = Seasons.season1415;
-			Activities.activities = null;
 		}
-
+		if (((List<JsonNode>)Cache.get("Activities")) == null) {
+			Cache.set("Activities", new LinkedList<JsonNode>());
+		}
+		
 		getAthlete(session("token"));
 		getAthleteActivities(session("token"), season);
 
@@ -79,14 +84,14 @@ public class Application extends Controller {
 		return Athlete.athlete;
 	}
 
-	public static JsonNode getAthleteActivities(String access_token,
+	public static List<JsonNode> getAthleteActivities(String access_token,
 			String season) {
-		if (Activities.activities == null || Activities.season != season) {
+		
+		Logger.debug("((List<JsonNode>) Cache.get(\"Activities\")).isEmpty()" + ((List<JsonNode>) Cache.get("Activities")).isEmpty());
 
+		if (((List<JsonNode>) Cache.get("Activities")).isEmpty()) {
 			Activities.season = season;
-			Activities.activities = WS
-					.url("https://www.strava.com/api/v3/athlete/activities")
-					.setQueryParameter("after", getAfter(season))
+			WS.url("https://www.strava.com/api/v3/athlete/activities")
 					.setQueryParameter("before", getBefore(season))
 					.setQueryParameter("access_token", access_token)
 					.get()
@@ -94,9 +99,53 @@ public class Application extends Controller {
 						public JsonNode apply(WS.Response response) {
 							return response.asJson();
 						}
-					}).get(10000);
+					})
+					.get(10000)
+					.forEach(
+							(activity) -> {
+								List<JsonNode> a = (List<JsonNode>) Cache.get("Activities");
+								a.add(activity);
+								Cache.set("Activities", a);
+							});
+
+			new Thread("GetCachedActivities") {
+				public void run() {
+					Logger.debug("Thread: " + getName() + " running");
+					cacheAthleteActivities(access_token, getLastCachedActivityDate());
+				}
+			}.start();
+
 		}
-		return Activities.activities;
+		// Logger.debug("after" + getAfter(season));
+		// Logger.debug("before" + getBefore(season));
+		// Logger.debug(Activities.activities.toString());
+
+		return ((List<JsonNode>) Cache.get("Activities"));
+	}
+
+	private static void cacheAthleteActivities(String token, String before) {
+		//Logger.debug("In cacheAthleteActivities for dates before " + before);
+		WS.url("https://www.strava.com/api/v3/athlete/activities")
+				.setQueryParameter("before", before)
+				.setQueryParameter("access_token", token)
+				.get()
+				.map(new Function<WS.Response, JsonNode>() {
+					public JsonNode apply(WS.Response response) {
+						return response.asJson();
+					}
+				})
+				.get(10000)
+				.forEach((activity) -> {
+					List<JsonNode> a = (List<JsonNode>) Cache.get("Activities");
+					a.add(activity);
+					Cache.set("Activities", a);
+				});
+		Logger.debug( "Activities size in Cache is " + ((List<JsonNode>)Cache.get("Activities")).size());
+		
+		if(!before.equals(getLastCachedActivityDate()))
+			cacheAthleteActivities(token, getLastCachedActivityDate());
+		
+
 	}
 
 	public static Result getStatistics() {
@@ -105,9 +154,8 @@ public class Application extends Controller {
 	}
 
 	public static Result getActivityDetails(String id) {
-		return WS.url("https://www.strava.com/api/v3/activities/"+id)
-				.setQueryParameter("access_token", session("token"))
-				.get()
+		return WS.url("https://www.strava.com/api/v3/activities/" + id)
+				.setQueryParameter("access_token", session("token")).get()
 				.map(new Function<WS.Response, Result>() {
 					public Result apply(WS.Response response) {
 						return ok(response.asJson());
@@ -137,6 +185,23 @@ public class Application extends Controller {
 					.toString(format.parse(season.split("-")[1]).getTime() / 1000);
 		} catch (ParseException e) {
 			Logger.error("Cannot parse date from season " + season);
+			return null;
+		}
+
+	}
+	
+	private static String getLastCachedActivityDate() {
+		final String startdate = ((List<JsonNode>) Cache.get("Activities")).get(
+				((List<JsonNode>) Cache.get("Activities")).size() - 1)
+				.findValue("start_date").asText();
+		
+		final DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+
+		try {
+			return Long
+					.toString(format.parse(startdate.substring(0, 10)).getTime() / 1000);
+		} catch (ParseException e) {
+			Logger.error("Cannot parse date from Strava date " + startdate);
 			return null;
 		}
 

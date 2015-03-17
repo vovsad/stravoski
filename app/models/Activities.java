@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.persistence.Entity;
 
 import play.Logger;
+import play.cache.Cache;
 import play.libs.Json;
 import play.mvc.Result;
 
@@ -21,15 +22,14 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @Entity
 public class Activities {
-	public static JsonNode activities;
+	public static List<JsonNode> activities;
 	public static String season = Seasons.season1415;
 
 	public static JsonNode filterToSkiActivities() {
-		if (activities == null)
-			return null;
+		
 		ArrayNode skiActivities = JsonNodeFactory.instance.arrayNode();
 
-		activities.forEach((activity) -> {
+		((List<JsonNode>) Cache.get("Activities")).forEach((activity) -> {
 			if (activity.findValue("type").asText().contains("AlpineSki")) {
 				skiActivities.add(activity);
 			}
@@ -41,8 +41,6 @@ public class Activities {
 
 	public static ObjectNode getStatistics() {
 
-		if (activities == null)
-			return Json.newObject();
 		ObjectNode statistics = Json.newObject();
 
 		statistics.put("count", getSkiActivitiesCount());
@@ -54,8 +52,6 @@ public class Activities {
 	}
 
 	public static int getSkiActivitiesDays() {
-		if (activities == null)
-			return 0;
 
 		List<String> dates = new LinkedList<String>();
 		for (Iterator<JsonNode> i = filterToSkiActivities().iterator(); i.hasNext();) {
@@ -68,16 +64,10 @@ public class Activities {
 	}
 
 	public static int getSkiActivitiesCount() {
-		if (activities == null)
-			return 0;
-
 		return filterToSkiActivities().size();
 	}
 
 	public static int getSkiSeasonTotalDistanceInKm() {
-		if (activities == null)
-			return 0;
-
 		int totalDistance = 0;
 		for (Iterator<JsonNode> i = filterToSkiActivities().iterator(); i.hasNext();) 
 				totalDistance += i.next().findValue("distance").asDouble();
@@ -87,9 +77,6 @@ public class Activities {
 	}
 
 	public static int getSkiSeasonLongestRideInKm() {
-		if (activities == null)
-			return 0;
-
 		int maxDistance = 0;
 		for (Iterator<JsonNode> i = filterToSkiActivities().iterator(); i.hasNext();){
 			JsonNode node = i.next();
