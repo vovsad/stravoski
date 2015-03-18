@@ -72,7 +72,7 @@ public class Activities {
 	public static int getSkiActivitiesDays() {
 
 		List<String> dates = new LinkedList<String>();
-		for (Iterator<JsonNode> i = filterToSkiActivities().iterator(); i.hasNext();) {
+		for (Iterator<JsonNode> i = filterToSelectedDates().iterator(); i.hasNext();) {
 			JsonNode node = i.next();
 			dates.add(node.findValue("start_date").asText().substring(0, 10));
 		}
@@ -82,12 +82,12 @@ public class Activities {
 	}
 
 	public static int getSkiActivitiesCount() {
-		return filterToSkiActivities().size();
+		return filterToSelectedDates().size();
 	}
 
 	public static int getSkiSeasonTotalDistanceInKm() {
 		int totalDistance = 0;
-		for (Iterator<JsonNode> i = filterToSkiActivities().iterator(); i.hasNext();) 
+		for (Iterator<JsonNode> i = filterToSelectedDates().iterator(); i.hasNext();) 
 				totalDistance += i.next().findValue("distance").asDouble();
 
 
@@ -96,7 +96,7 @@ public class Activities {
 
 	public static int getSkiSeasonLongestRideInKm() {
 		int maxDistance = 0;
-		for (Iterator<JsonNode> i = filterToSkiActivities().iterator(); i.hasNext();){
+		for (Iterator<JsonNode> i = filterToSelectedDates().iterator(); i.hasNext();){
 			JsonNode node = i.next();
 			maxDistance = maxDistance > node.findValue("distance")
 			.asDouble() ? maxDistance : node.findValue("distance")

@@ -92,7 +92,6 @@ public class Application extends Controller {
 
 		if (((List<JsonNode>) Cache.get("Activities")).isEmpty()) {
 			WS.url("https://www.strava.com/api/v3/athlete/activities")
-//					.setQueryParameter("before", getBefore(season))
 					.setQueryParameter("access_token", access_token)
 					.get()
 					.map(new Function<WS.Response, JsonNode>() {
@@ -116,9 +115,6 @@ public class Application extends Controller {
 			}.start();
 
 		}
-		// Logger.debug("after" + getAfter(season));
-		// Logger.debug("before" + getBefore(season));
-		// Logger.debug(Activities.activities.toString());
 
 		return ((List<JsonNode>) Cache.get("Activities"));
 	}
