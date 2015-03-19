@@ -109,7 +109,7 @@
 		    <div class="modal-content">
 		      <div class="modal-header">
 		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-		        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+		        <h4 class="modal-title" id="myModalLabel">Loading...</h4>
 		      </div>
 		      <div class="modal-body">
 
@@ -117,7 +117,7 @@
 
 	    		<div class="row">
         		<div class="col-md-4">
-        			<img class="modal-map-summary" id="mapsummary" src=""/>
+        			<img class="modal-map-summary" src=""/>
         		</div>
         		<div class="col-md-4">Stats</div>
 		        
@@ -133,20 +133,14 @@
 		$('#activityModalInfo').on('show.bs.modal', function (event) {
 		  var element = $(event.relatedTarget) // Button that triggered the modal
 		  var activityid = element.data('activityid') // Extract info from data-* attributes
-		  // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
-		  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+
 		  var modal = $(this)
-		  
-		  modal.find('.modal-title').text('Loading')
-		  
-		  
 
 		  $.get( "/activity", {access_token: '@session.get("token")', id: activityid} )
 			.done(function( data ) {
 			modal.find('.modal-title').text(data.name)
 			modal.find('.modal-body-location').text(data.location_city)
-
-			$('#mapsummary').attr('src', 'http://maps.googleapis.com/maps/api/staticmap?sensor=false&size=150x150&path=weight:3|color:red|enc:' + data.map.summary_polyline)
+			modal.find('.modal-map-summary').attr('src', 'http://maps.googleapis.com/maps/api/staticmap?sensor=false&size=150x150&path=weight:3|color:red|enc:' + data.map.summary_polyline)
 			
 			});
 		})
