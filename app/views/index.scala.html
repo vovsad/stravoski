@@ -112,11 +112,19 @@
 		        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
 		      </div>
 		      <div class="modal-body">
-		        ...
+
+				<legend class="modal-body-location">Loading...</legend>
+
+	    		<div class="row">
+        		<div class="col-md-4">
+        			<img class="modal-map-summary" id="mapsummary" src=""/>
+        		</div>
+        		<div class="col-md-4">Stats</div>
+		        
 		      </div>
+		      
 		      <div class="modal-footer">
-		        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-		        <button type="button" class="btn btn-primary">Save changes</button>
+		        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
 		      </div>
 		    </div>
 		  </div>
@@ -129,13 +137,17 @@
 		  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
 		  var modal = $(this)
 		  
-		  modal.find('.modal-title').text('Activity ID ' + activityid)
+		  modal.find('.modal-title').text('Loading')
 		  
 		  
 
 		  $.get( "/activity", {access_token: '@session.get("token")', id: activityid} )
 			.done(function( data ) {
-			modal.find('.modal-body').text("Activity id " + data.id)
+			modal.find('.modal-title').text(data.name)
+			modal.find('.modal-body-location').text(data.location_city)
+
+			$('#mapsummary').attr('src', 'http://maps.googleapis.com/maps/api/staticmap?sensor=false&size=150x150&path=weight:3|color:red|enc:' + data.map.summary_polyline)
+			
 			});
 		})
 		</script>

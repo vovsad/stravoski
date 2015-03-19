@@ -107,12 +107,12 @@ public class Application extends Controller {
 								Cache.set("Activities", a);
 							});
 
-			new Thread("GetCachedActivities") {
-				public void run() {
-					Logger.debug("Thread: " + getName() + " running");
-					cacheAthleteActivities(access_token, getLastCachedActivityDate());
-				}
-			}.start();
+//			new Thread("GetCachedActivities") {
+//				public void run() {
+//					Logger.debug("Thread: " + getName() + " running");
+//					cacheAthleteActivities(access_token, getLastCachedActivityDate());
+//				}
+//			}.start();
 
 		}
 
@@ -155,6 +155,7 @@ public class Application extends Controller {
 				.setQueryParameter("access_token", session("token")).get()
 				.map(new Function<WS.Response, Result>() {
 					public Result apply(WS.Response response) {
+						Logger.debug(response.asJson().toString());
 						return ok(response.asJson());
 					}
 				}).get(10000);
