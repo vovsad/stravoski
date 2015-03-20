@@ -85,7 +85,7 @@
         				<th>Date</th>
         				<th>Name</th>
         				<th>Location</th>
-        				<th>Length, km</th>
+        				<th>Distance with lifts, km</th>
     				</tr>
 				</thead>
 				<tbody>
@@ -119,7 +119,9 @@
         		<div class="col-md-4">
         			<img class="modal-map-summary" src=""/>
         		</div>
-        		<div class="col-md-4">Stats</div>
+        		<div class="col-md-4">
+        			<div class="modal-body-real-ski-distance">Loading..</div>
+				</div>
 		        
 		      </div>
 		      
@@ -135,6 +137,10 @@
 		  var activityid = element.data('activityid') // Extract info from data-* attributes
 
 		  var modal = $(this)
+		  modal.find('.modal-body-real-ski-distance').text('Loading..')
+		  modal.find('.modal-title').text('Loading..')
+		  modal.find('.modal-body-location').text('Loading..')
+		  modal.find('.modal-map-summary').attr('src', '')
 
 		  $.get( "/activity", {access_token: '@session.get("token")', id: activityid} )
 			.done(function( data ) {
@@ -143,6 +149,13 @@
 			modal.find('.modal-map-summary').attr('src', 'http://maps.googleapis.com/maps/api/staticmap?sensor=false&size=150x150&path=weight:3|color:red|enc:' + data.map.summary_polyline)
 			
 			});
+
+		  $.get( "/skimeanfulldata", {id: activityid} )
+			.done(function( data ) {
+			modal.find('.modal-body-real-ski-distance').text('Downhill distance ' + data.downhilled_distance + 'km')
+			console.log(data)
+			});
+			
 		})
 		</script>
 

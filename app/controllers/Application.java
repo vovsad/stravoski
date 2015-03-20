@@ -3,10 +3,14 @@ package controllers;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.TimeZone;
 
 import models.Activities;
@@ -14,9 +18,11 @@ import models.Athlete;
 import models.Seasons;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import play.Logger;
+import play.libs.Json;
 import play.libs.WS;
 import play.libs.F.Function;
 import play.libs.F.Promise;
@@ -57,13 +63,13 @@ public class Application extends Controller {
 	public static Result dashboard(String season) throws ParseException {
 		if (season == null) {
 			Activities.season = Seasons.season1415;
-		}else{
+		} else {
 			Activities.season = season;
 		}
-		if (((List<JsonNode>)Cache.get("Activities")) == null) {
+		if (((List<JsonNode>) Cache.get("Activities")) == null) {
 			Cache.set("Activities", new LinkedList<JsonNode>());
 		}
-		
+
 		getAthlete(session("token"));
 		getAthleteActivities(session("token"));
 
@@ -87,8 +93,9 @@ public class Application extends Controller {
 	}
 
 	public static List<JsonNode> getAthleteActivities(String access_token) {
-		
-		Logger.debug("((List<JsonNode>) Cache.get(\"Activities\")).isEmpty()" + ((List<JsonNode>) Cache.get("Activities")).isEmpty());
+
+		Logger.debug("((List<JsonNode>) Cache.get(\"Activities\")).isEmpty()"
+				+ ((List<JsonNode>) Cache.get("Activities")).isEmpty());
 
 		if (((List<JsonNode>) Cache.get("Activities")).isEmpty()) {
 			WS.url("https://www.strava.com/api/v3/athlete/activities")
@@ -102,7 +109,8 @@ public class Application extends Controller {
 					.get(10000)
 					.forEach(
 							(activity) -> {
-								List<JsonNode> a = (List<JsonNode>) Cache.get("Activities");
+								List<JsonNode> a = (List<JsonNode>) Cache
+										.get("Activities");
 								a.add(activity);
 								Cache.set("Activities", a);
 							});
@@ -131,17 +139,20 @@ public class Application extends Controller {
 					}
 				})
 				.get(10000)
-				.forEach((activity) -> {
-					List<JsonNode> a = (List<JsonNode>) Cache.get("Activities");
-					a.add(activity);
-					Cache.set("Activities", a);
-				});
-		Logger.debug( "Activities size in Cache is " + ((List<JsonNode>)Cache.get("Activities")).size());
-		Logger.debug( "before.equals(getLastCachedActivityDate() " + before + " " +getLastCachedActivityDate());
-		
-		if(!before.equals(getLastCachedActivityDate()))
+				.forEach(
+						(activity) -> {
+							List<JsonNode> a = (List<JsonNode>) Cache
+									.get("Activities");
+							a.add(activity);
+							Cache.set("Activities", a);
+						});
+		Logger.debug("Activities size in Cache is "
+				+ ((List<JsonNode>) Cache.get("Activities")).size());
+		Logger.debug("before.equals(getLastCachedActivityDate() " + before
+				+ " " + getLastCachedActivityDate());
+
+		if (!before.equals(getLastCachedActivityDate()))
 			cacheAthleteActivities(token, getLastCachedActivityDate());
-		
 
 	}
 
@@ -162,16 +173,57 @@ public class Application extends Controller {
 
 	}
 
+	public static Result getSkiMeanfullData(String id) {
+		JsonNode streams = WS
+				.url("https://www.strava.com/api/v3/activities/" + id + "/streams/distance,altitude")
+				.setQueryParameter("access_token", session("token")).get()
+				.map(new Function<WS.Response, JsonNode>() {
+					public JsonNode apply(WS.Response response) {
+						return response.asJson();
+					}
+				}).get(10000);
+		// JsonNode streams =
+		// WS.url("http://localhost:9000/assets/data/DistanceAltitude.json").get()
+
+		List<SimpleEntry<Double, Double>> streamsDataOriginal = new LinkedList<>();
+//		List<SimpleEntry<Double, Double>> streamsDataOnlyDownhill = new LinkedList<>();
+
+		Iterator<JsonNode> distance = streams.get(1).findValue("data").iterator();
+		Iterator<JsonNode> altitude = streams.get(0).findValue("data").iterator();
+		for (; altitude.hasNext() && distance.hasNext();) {
+			streamsDataOriginal.add(new AbstractMap.SimpleEntry<>(distance
+					.next().asDouble(), altitude.next().asDouble()));
+		}
+
+		Double previousAltitudePoint = 0.0, previousDistancePoint = 0.0, downhillDistance = 0.0;
+		for (SimpleEntry<Double, Double> i : streamsDataOriginal) {
+
+			if (i.getKey() <= previousAltitudePoint) {
+//				streamsDataOnlyDownhill.add(i);
+				downhillDistance += i.getValue() - previousDistancePoint;
+			}
+			previousAltitudePoint = i.getKey();
+			previousDistancePoint = i.getValue();
+
+		}
+
+		ObjectNode recalculatedToSki = Json.newObject();
+		recalculatedToSki.put("downhilled_distance", Math.round(downhillDistance)/1000);
+		Logger.debug(recalculatedToSki.toString());
+
+		return ok(recalculatedToSki);
+	}
+
 	private static String getLastCachedActivityDate() {
-		final String startdate = ((List<JsonNode>) Cache.get("Activities")).get(
-				((List<JsonNode>) Cache.get("Activities")).size() - 1)
+		final String startdate = ((List<JsonNode>) Cache.get("Activities"))
+				.get(((List<JsonNode>) Cache.get("Activities")).size() - 1)
 				.findValue("start_date").asText();
-		
+
 		final DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 
 		try {
-			return Long
-					.toString(format.parse(startdate.substring(0, 10)).getTime() / 1000);
+			return Long.toString(format.parse(startdate.substring(0, 10))
+					.getTime() / 1000);
 		} catch (ParseException e) {
 			Logger.error("Cannot parse date from Strava date " + startdate);
 			return null;
