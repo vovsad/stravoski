@@ -148,13 +148,20 @@
 			modal.find('.modal-body-location').text(data.location_city)
 			modal.find('.modal-map-summary').attr('src', 'http://maps.googleapis.com/maps/api/staticmap?sensor=false&size=150x150&path=weight:3|color:red|enc:' + data.map.summary_polyline)
 			
+			})
+			.fail(function() {
+			modal.find('.modal-title').text('')
+			modal.find('.modal-body-location').text('Error loading activity details, please try to refresh data')
 			});
 
 		  $.get( "/skimeanfulldata", {id: activityid} )
 			.done(function( data ) {
 			modal.find('.modal-body-real-ski-distance').text('Downhill distance ' + data.downhilled_distance + 'km')
-			console.log(data)
+			})
+			.fail(function() {
+			modal.find('.modal-body-real-ski-distance').text('Cannot calculate real ski distance')
 			});
+
 			
 		})
 		</script>
