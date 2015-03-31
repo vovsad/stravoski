@@ -28,11 +28,14 @@ public class Activities {
 	public static List<JsonNode> activities;
 	public static String season = Seasons.season1415;
 
-	public static JsonNode filterToSkiActivities() {
+	public static JsonNode filterToSkiActivities(String id) {
 		
 		ArrayNode skiActivities = JsonNodeFactory.instance.arrayNode();
+		Logger.debug("in filterToSkiActivities()");
+		Logger.debug("AthleteID = " + id);
+		Logger.debug("Cache.get(AthleteID) :: " + Cache.get(id).toString().substring(0, 50));
 
-		((List<JsonNode>) Cache.get("Activities")).forEach((activity) -> {
+		((List<JsonNode>) Cache.get(id)).forEach((activity) -> {
 			if (activity.findValue("type").asText().contains("AlpineSki")) {
 				skiActivities.add(activity);
 			}
@@ -42,11 +45,12 @@ public class Activities {
 
 	}
 	
-	public static JsonNode filterToSelectedDates() {
-		
+	public static JsonNode filterToSelectedDates(String id) {
+		Logger.debug("in filterToSelectedDates");
+	
 		ArrayNode filteredActivities = JsonNodeFactory.instance.arrayNode(); 
 				
-		filterToSkiActivities().forEach((activity) -> {
+		filterToSkiActivities(id).forEach((activity) -> {
 			if (getTo(season) > getActivityDate(activity) && 
 					getActivityDate(activity) > getFrom(season)){
 				filteredActivities.add(activity);
@@ -57,22 +61,22 @@ public class Activities {
 
 	}
 
-	public static ObjectNode getStatistics() {
+	public static ObjectNode getStatistics(String id) {
 
 		ObjectNode statistics = Json.newObject();
 
-		statistics.put("count", getSkiActivitiesCount());
-		statistics.put("total_skiing_days", getSkiActivitiesDays());
-		statistics.put("total_distance", getSkiSeasonTotalDistanceInKm());
-		statistics.put("max_skiing_day", getSkiSeasonLongestRideInKm());
+		statistics.put("count", getSkiActivitiesCount(id));
+		statistics.put("total_skiing_days", getSkiActivitiesDays(id));
+		statistics.put("total_distance", getSkiSeasonTotalDistanceInKm(id));
+		statistics.put("max_skiing_day", getSkiSeasonLongestRideInKm(id));
 
 		return statistics;
 	}
 
-	public static int getSkiActivitiesDays() {
+	public static int getSkiActivitiesDays(String id) {
 
 		List<String> dates = new LinkedList<String>();
-		for (Iterator<JsonNode> i = filterToSelectedDates().iterator(); i.hasNext();) {
+		for (Iterator<JsonNode> i = filterToSelectedDates(id).iterator(); i.hasNext();) {
 			JsonNode node = i.next();
 			dates.add(node.findValue("start_date").asText().substring(0, 10));
 		}
@@ -81,22 +85,22 @@ public class Activities {
 				.size();
 	}
 
-	public static int getSkiActivitiesCount() {
-		return filterToSelectedDates().size();
+	public static int getSkiActivitiesCount(String id) {
+		return filterToSelectedDates(id).size();
 	}
 
-	public static int getSkiSeasonTotalDistanceInKm() {
+	public static int getSkiSeasonTotalDistanceInKm(String id) {
 		int totalDistance = 0;
-		for (Iterator<JsonNode> i = filterToSelectedDates().iterator(); i.hasNext();) 
+		for (Iterator<JsonNode> i = filterToSelectedDates(id).iterator(); i.hasNext();) 
 				totalDistance += i.next().findValue("distance").asDouble();
 
 
 		return totalDistance / 1000;
 	}
 
-	public static int getSkiSeasonLongestRideInKm() {
+	public static int getSkiSeasonLongestRideInKm(String id) {
 		int maxDistance = 0;
-		for (Iterator<JsonNode> i = filterToSelectedDates().iterator(); i.hasNext();){
+		for (Iterator<JsonNode> i = filterToSelectedDates(id).iterator(); i.hasNext();){
 			JsonNode node = i.next();
 			maxDistance = maxDistance > node.findValue("distance")
 			.asDouble() ? maxDistance : node.findValue("distance")

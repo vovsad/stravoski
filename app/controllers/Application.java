@@ -33,16 +33,20 @@ import play.cache.Cache;
 public class Application extends Controller {
 
 	public static Result index() {
-		if (session("token") != null)
+		Logger.debug("in index");
+
+		if (session("token") != null){
 			return redirect("/dashboard");
+		}
 		return ok(views.html.index.render(
 				"Authorize Strava API Sample to connect to your account",
 				Boolean.FALSE));
 	}
 
 	public static Result tokenExchange(String code) {
-		Logger.debug("getAthlete");
-		if (Athlete.athlete == null)
+		Logger.debug("in tokenExchange");
+		
+		if (session("token") == null) {
 			Athlete.athlete = WS
 					.url("https://www.strava.com/oauth/token")
 					.setContentType("application/x-www-form-urlencoded")
@@ -54,20 +58,21 @@ public class Application extends Controller {
 							return response.asJson();
 						}
 					}).get(10000);
-
-		session("token", Athlete.athlete.findValue("access_token").asText());
+			Logger.debug(Athlete.athlete.toString());
+			session("token", Athlete.athlete.findValue("access_token").asText());
+		}
+		session("AthleteID", Athlete.athlete.findValue("id").asText());
 
 		return redirect("/dashboard");
 	}
 
 	public static Result dashboard(String season) throws ParseException {
+		Logger.debug("in dashboard");
+
 		if (season == null) {
 			Activities.season = Seasons.season1415;
 		} else {
 			Activities.season = season;
-		}
-		if (((List<JsonNode>) Cache.get("Activities")) == null) {
-			Cache.set("Activities", new LinkedList<JsonNode>());
 		}
 
 		getAthlete(session("token"));
@@ -80,7 +85,8 @@ public class Application extends Controller {
 
 	// Client Secret: 22122cf967940aa0d142f51ca987b878aba948eb
 	public static JsonNode getAthlete(String access_token) {
-		if (Athlete.athlete == null)
+		Logger.debug("in getAthlete");
+		if (Athlete.athlete == null){
 			Athlete.athlete = WS.url("https://www.strava.com//api/v3/athlete")
 					.setQueryParameter("access_token", access_token).get()
 					.map(new Function<WS.Response, JsonNode>() {
@@ -89,15 +95,21 @@ public class Application extends Controller {
 						}
 					}).get(10000);
 
+			session("AthleteID", Athlete.athlete.findValue("id").asText());
+		}
+
 		return Athlete.athlete;
 	}
 
 	public static List<JsonNode> getAthleteActivities(String access_token) {
+		Logger.debug("in getAthleteActivities");
 
-		Logger.debug("((List<JsonNode>) Cache.get(\"Activities\")).isEmpty()"
-				+ ((List<JsonNode>) Cache.get("Activities")).isEmpty());
+		if (Cache.get(session("AthleteID")) == null) {
+			Cache.set(session("AthleteID"), new LinkedList<JsonNode>());
+		}
 
-		if (((List<JsonNode>) Cache.get("Activities")).isEmpty()) {
+		
+		if (((List<JsonNode>) Cache.get(session("AthleteID"))).isEmpty()) {
 			WS.url("https://www.strava.com/api/v3/athlete/activities")
 					.setQueryParameter("access_token", access_token)
 					.get()
@@ -109,45 +121,40 @@ public class Application extends Controller {
 					.get(10000)
 					.forEach(
 							(activity) -> {
-								List<JsonNode> a = (List<JsonNode>) Cache
-										.get("Activities");
+								List<JsonNode> a = (List<JsonNode>) Cache.get(session("AthleteID"));
 								a.add(activity);
-								Cache.set("Activities", a);
+								Cache.set(session("AthleteID"), a);
 							});
 
-//			new Thread("GetCachedActivities") {
-//				public void run() {
-//					Logger.debug("Thread: " + getName() + " running");
-//					cacheAthleteActivities(access_token, getLastCachedActivityDate());
-//				}
-//			}.start();
+			// new Thread("GetCachedActivities") {
+			// public void run() {
+			// Logger.debug("Thread: " + getName() + " running");
+			// cacheAthleteActivities(access_token,
+			// getLastCachedActivityDate());
+			// }
+			// }.start();
 
 		}
 
-		return ((List<JsonNode>) Cache.get("Activities"));
+		return ((List<JsonNode>) Cache.get(session("AthleteID")));
 	}
 
 	private static void cacheAthleteActivities(String token, String before) {
 		Logger.debug("In cacheAthleteActivities for dates before " + before);
 		WS.url("https://www.strava.com/api/v3/athlete/activities")
 				.setQueryParameter("before", before)
-				.setQueryParameter("access_token", token)
-				.get()
+				.setQueryParameter("access_token", token).get()
 				.map(new Function<WS.Response, JsonNode>() {
 					public JsonNode apply(WS.Response response) {
 						return response.asJson();
 					}
-				})
-				.get(10000)
-				.forEach(
-						(activity) -> {
-							List<JsonNode> a = (List<JsonNode>) Cache
-									.get("Activities");
-							a.add(activity);
-							Cache.set("Activities", a);
-						});
+				}).get(10000).forEach((activity) -> {
+					List<JsonNode> a = (List<JsonNode>) Cache.get(session("AthleteID"));
+					a.add(activity);
+					Cache.set(session("AthleteID"), a);
+				});
 		Logger.debug("Activities size in Cache is "
-				+ ((List<JsonNode>) Cache.get("Activities")).size());
+				+ ((List<JsonNode>) Cache.get(session("AthleteID"))).size());
 		Logger.debug("before.equals(getLastCachedActivityDate() " + before
 				+ " " + getLastCachedActivityDate());
 
@@ -158,7 +165,7 @@ public class Application extends Controller {
 
 	public static Result getStatistics() {
 		// getAthleteActivities(session("token"));
-		return ok(Activities.getStatistics());
+		return ok(Activities.getStatistics(session("AthleteID")));
 	}
 
 	public static Result getActivityDetails(String id) {
@@ -175,7 +182,8 @@ public class Application extends Controller {
 
 	public static Result getSkiMeanfullData(String id) {
 		JsonNode streams = WS
-				.url("https://www.strava.com/api/v3/activities/" + id + "/streams/distance,altitude")
+				.url("https://www.strava.com/api/v3/activities/" + id
+						+ "/streams/distance,altitude")
 				.setQueryParameter("access_token", session("token")).get()
 				.map(new Function<WS.Response, JsonNode>() {
 					public JsonNode apply(WS.Response response) {
@@ -186,10 +194,13 @@ public class Application extends Controller {
 		// WS.url("http://localhost:9000/assets/data/DistanceAltitude.json").get()
 
 		List<SimpleEntry<Double, Double>> streamsDataOriginal = new LinkedList<>();
-//		List<SimpleEntry<Double, Double>> streamsDataOnlyDownhill = new LinkedList<>();
+		// List<SimpleEntry<Double, Double>> streamsDataOnlyDownhill = new
+		// LinkedList<>();
 
-		Iterator<JsonNode> distance = streams.get(1).findValue("data").iterator();
-		Iterator<JsonNode> altitude = streams.get(0).findValue("data").iterator();
+		Iterator<JsonNode> distance = streams.get(1).findValue("data")
+				.iterator();
+		Iterator<JsonNode> altitude = streams.get(0).findValue("data")
+				.iterator();
 		for (; altitude.hasNext() && distance.hasNext();) {
 			streamsDataOriginal.add(new AbstractMap.SimpleEntry<>(distance
 					.next().asDouble(), altitude.next().asDouble()));
@@ -199,7 +210,7 @@ public class Application extends Controller {
 		for (SimpleEntry<Double, Double> i : streamsDataOriginal) {
 
 			if (i.getKey() <= previousAltitudePoint) {
-//				streamsDataOnlyDownhill.add(i);
+				// streamsDataOnlyDownhill.add(i);
 				downhillDistance += i.getValue() - previousDistancePoint;
 			}
 			previousAltitudePoint = i.getKey();
@@ -208,15 +219,16 @@ public class Application extends Controller {
 		}
 
 		ObjectNode recalculatedToSki = Json.newObject();
-		recalculatedToSki.put("downhilled_distance", Math.round(downhillDistance)/1000);
+		recalculatedToSki.put("downhilled_distance",
+				Math.round(downhillDistance) / 1000);
 		Logger.debug(recalculatedToSki.toString());
 
 		return ok(recalculatedToSki);
 	}
 
 	private static String getLastCachedActivityDate() {
-		final String startdate = ((List<JsonNode>) Cache.get("Activities"))
-				.get(((List<JsonNode>) Cache.get("Activities")).size() - 1)
+		final String startdate = ((List<JsonNode>) Cache.get(session("AthleteID")))
+				.get(((List<JsonNode>) Cache.get(session("AthleteID"))).size() - 1)
 				.findValue("start_date").asText();
 
 		final DateFormat format = new SimpleDateFormat("yyyy-MM-dd");

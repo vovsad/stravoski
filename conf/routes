@@ -11,6 +11,6 @@ GET     /webjars/*file              controllers.WebJarAssets.at(file)
 #Strava login
 GET     /dashboard				controllers.Application.dashboard(season ?= null)
 GET     /tokenexchange				controllers.Application.tokenExchange(code)
-GET     /statistics				controllers.Application.getStatistics()
+#GET     /statistics				controllers.Application.getStatistics()
 GET     /activity				controllers.Application.getActivityDetails(id)
 GET     /skimeanfulldata				controllers.Application.getSkiMeanfullData(id)

@@ -56,5 +56,18 @@ public class ApplicationTest {
             }
         });
     }
+    
+    @Test
+    public void activitySkiedDistanceIsCalculated() {
+        running(fakeApplication(), new Runnable() {
+            public void run() {
+                Result result = callAction(routes.ref.Application.getSkiMeanfullData("265640103"));
+                assertThat(status(result)).isEqualTo(OK);
+                assertThat(contentType(result)).isEqualTo("text/html");
+                assertThat(charset(result)).isEqualTo("utf-8");
+                assertThat(contentAsString(result)).contains("downhilled_distance: 14");
+            }
+        });
+    }
 
 }

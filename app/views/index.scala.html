@@ -51,9 +51,9 @@
         <div class="col-md-4"></div>
         <div class="col-md-4">
         	<legend>Statistics</legend>
-        	<p>@Activities.getSkiActivitiesDays() ski days in season</p>
-        	<p>@Activities.getSkiSeasonTotalDistanceInKm() km skied in season</p>
-        	<p>Longest riding day was @Activities.getSkiSeasonLongestRideInKm() km</p>
+        	<p>@Activities.getSkiActivitiesDays(session.get("AthleteID")) ski days in season</p>
+        	<p>@Activities.getSkiSeasonTotalDistanceInKm(session.get("AthleteID")) km skied in season</p>
+        	<p>Longest riding day was @Activities.getSkiSeasonLongestRideInKm(session.get("AthleteID")) km</p>
         	
         </div>
         <div class="col-md-4">
@@ -89,7 +89,7 @@
     				</tr>
 				</thead>
 				<tbody>
-				@for(activity <- Activities.filterToSelectedDates().elements()){
+				@for(activity <- Activities.filterToSelectedDates(session.get("AthleteID")).elements()){
     				<tr data-toggle="modal" data-target="#activityModalInfo" data-activityid="@activity.findValue("id")">
     					<td>@activity.findValue("start_date")</td>
     					<td>@activity.findValue("name")</td>
