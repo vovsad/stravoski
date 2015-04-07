@@ -7,6 +7,7 @@ version := "1.0-SNAPSHOT"
 libraryDependencies ++= Seq(
 	cache,
 	javaJdbc,
+	javaEbean,
 	javaJpa,
 	"org.hibernate" % "hibernate-entitymanager" % "3.6.9.Final",
 	"org.webjars" %% "webjars-play" % "2.2.2", 

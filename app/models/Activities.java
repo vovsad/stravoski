@@ -23,9 +23,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-@Entity
 public class Activities {
-	public static List<JsonNode> activities;
 	public static String season = Seasons.season1415;
 
 	public static JsonNode filterToSkiActivities(String id) {

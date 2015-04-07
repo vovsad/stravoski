@@ -17,6 +17,7 @@ import models.Activities;
 import models.Athlete;
 import models.Seasons;
 
+import com.avaje.ebean.Ebean;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -126,20 +127,20 @@ public class Application extends Controller {
 								Cache.set(session("AthleteID"), a);
 							});
 
-			// new Thread("GetCachedActivities") {
-			// public void run() {
-			// Logger.debug("Thread: " + getName() + " running");
-			// cacheAthleteActivities(access_token,
-			// getLastCachedActivityDate());
-			// }
-			// }.start();
+			String AthleteID = session("AthleteID");
+			 new Thread("GetCachedActivities") {
+			 public void run() {
+			 Logger.debug("Thread: " + getName() + " running");
+			 cacheAthleteActivities(access_token, AthleteID, getLastCachedActivityDate(AthleteID));
+			 }
+			 }.start();
 
 		}
 
 		return ((List<JsonNode>) Cache.get(session("AthleteID")));
 	}
 
-	private static void cacheAthleteActivities(String token, String before) {
+	private static void cacheAthleteActivities(String token, String AthleteID, String before) {
 		Logger.debug("In cacheAthleteActivities for dates before " + before);
 		WS.url("https://www.strava.com/api/v3/athlete/activities")
 				.setQueryParameter("before", before)
@@ -149,17 +150,15 @@ public class Application extends Controller {
 						return response.asJson();
 					}
 				}).get(10000).forEach((activity) -> {
-					List<JsonNode> a = (List<JsonNode>) Cache.get(session("AthleteID"));
+					List<JsonNode> a = (List<JsonNode>) Cache.get(AthleteID);
 					a.add(activity);
-					Cache.set(session("AthleteID"), a);
+					Cache.set(AthleteID, a);
 				});
-		Logger.debug("Activities size in Cache is "
-				+ ((List<JsonNode>) Cache.get(session("AthleteID"))).size());
-		Logger.debug("before.equals(getLastCachedActivityDate() " + before
-				+ " " + getLastCachedActivityDate());
+		Logger.debug("Activities size in Cache is " + ((List<JsonNode>) Cache.get(AthleteID)).size());
+		Logger.debug("before.equals(getLastCachedActivityDate() " + before + " " + getLastCachedActivityDate(AthleteID));
 
-		if (!before.equals(getLastCachedActivityDate()))
-			cacheAthleteActivities(token, getLastCachedActivityDate());
+		if (!before.equals(getLastCachedActivityDate(AthleteID)))
+			cacheAthleteActivities(token, AthleteID, getLastCachedActivityDate(AthleteID));
 
 	}
 
@@ -226,9 +225,9 @@ public class Application extends Controller {
 		return ok(recalculatedToSki);
 	}
 
-	private static String getLastCachedActivityDate() {
-		final String startdate = ((List<JsonNode>) Cache.get(session("AthleteID")))
-				.get(((List<JsonNode>) Cache.get(session("AthleteID"))).size() - 1)
+	private static String getLastCachedActivityDate(String AthleteID) {
+		final String startdate = ((List<JsonNode>) Cache.get(AthleteID))
+				.get(((List<JsonNode>) Cache.get(AthleteID)).size() - 1)
 				.findValue("start_date").asText();
 
 		final DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
