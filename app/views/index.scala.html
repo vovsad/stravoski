@@ -1,10 +1,10 @@
-@(message: String, isAuthenticated: Boolean)
+@(isAuthenticated: Boolean)
 
+@main("stravoski") {
 
-@main("Stravoski", message) {
 	@if(!isAuthenticated){
     
-    <h1>Authorize Strava API Sample to connect to your account</h1>
+    <h1>Stravoski uses Strava API to connect to your account</h1>
     <p>By authorizing an application you are still under Strava's Terms of Service</p>
     
 	<p>Amongst other things, this application will be able to:</p>
@@ -30,151 +30,17 @@
 
 	<div class="form-group">
 		<button id="logInWithStrava" class="btn btn-primary btn-lg">
-			<img alt="LogInWithStrava" src="/assets/images/LogInWithStrava@@2x.png">
+			<img alt="Log In With Strava" src="/assets/images/LogInWithStrava@@2x.png">
 		</button>
 	</div>
 	</fieldset>
 	</form>
 	<script type="text/javascript">
 		document.getElementById("logInWithStrava").onclick = function() {
-			location.href = "https://www.strava.com/oauth/authorize?client_id=1455&redirect_uri=http://localhost:9000/tokenexchange&response_type=code";
+			location.href = "/login";
 			return false;
 			};
 	</script>
-	} else {
-	
-<div class="container">
-
-		<h1>Ski activities</h1>
-
-	    <div class="row">
-        <div class="col-md-4"></div>
-        <div class="col-md-4">
-        	<legend>Statistics</legend>
-        	<p>@Activities.getSkiActivitiesDays(session.get("AthleteID")) ski days in season</p>
-        	<p>@Activities.getSkiSeasonTotalDistanceInKm(session.get("AthleteID")) km skied in season</p>
-        	<p>Longest riding day was @Activities.getSkiSeasonLongestRideInKm(session.get("AthleteID")) km</p>
-        	
-        </div>
-        <div class="col-md-4">
-        
-<form class="form-horizontal">
-  <fieldset>
-    <legend>Filter Dates</legend>
-    <div class="form-group">
-      <label for="datepicker" class="col-lg-2 control-label">Winter season</label>
-      <div class="col-lg-10">
-        <select class="form-control" name="season" id="season" onchange="this.form.submit();">
-          <option @if(Activities.season.equals(Seasons.season1415)){ selected="selected"}>@Seasons.season1415</option>
-          <option @if(Activities.season.equals(Seasons.season1314)){ selected="selected"}>@Seasons.season1314</option>
-          <option @if(Activities.season.equals(Seasons.season1213)){ selected="selected"}>@Seasons.season1213</option>
-          <option @if(Activities.season.equals(Seasons.season1112)){ selected="selected"}>@Seasons.season1112</option>
-          <option @if(Activities.season.equals(Seasons.season1011)){ selected="selected"}>@Seasons.season1011</option>
-        </select>
-      </div>
-    </div>
-  </fieldset>
-</form>
-
-	</div>
-</div>
-	    <div class="row">
-	    <h2>Season details</h2>
-		    <table class="table table-striped table-hover">
-		        <thead>
-    				<tr>
-        				<th>Date</th>
-        				<th>Name</th>
-        				<th>Location</th>
-        				<th>Distance with lifts, km</th>
-    				</tr>
-				</thead>
-				<tbody>
-				@for(activity <- Activities.filterToSelectedDates(session.get("AthleteID")).elements()){
-    				<tr data-toggle="modal" data-target="#activityModalInfo" data-activityid="@activity.findValue("id")">
-    					<td>@activity.findValue("start_date")</td>
-    					<td>@activity.findValue("name")</td>
-    					<td>@activity.findValue("location_city")</td>
-    					<td>@{activity.findValue("distance").asInt()/1000}</td>
-    				</tr>
-    				}
-		        </tbody>
-		    </table>
-
-	    </div>
-	    
-	    
-		<!-- Modal -->
-		<div class="modal fade" id="activityModalInfo" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-		  <div class="modal-dialog">
-		    <div class="modal-content">
-		      <div class="modal-header">
-		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-		        <h4 class="modal-title" id="myModalLabel">Loading...</h4>
-		      </div>
-		      <div class="modal-body">
-
-				<legend class="modal-body-location">Loading...</legend>
-
-	    		<div class="row">
-        		<div class="col-md-4">
-        			<img class="modal-map-summary" src=""/>
-        		</div>
-        		<div class="col-md-4">
-        			<div class="modal-body-real-ski-distance">Loading..</div>
-				</div>
-		        
-		      </div>
-		      
-		      <div class="modal-footer">
-		        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-		      </div>
-		    </div>
-		  </div>
-		</div>
-		<script>
-		$('#activityModalInfo').on('show.bs.modal', function (event) {
-		  var element = $(event.relatedTarget) // Button that triggered the modal
-		  var activityid = element.data('activityid') // Extract info from data-* attributes
-
-		  var modal = $(this)
-		  modal.find('.modal-body-real-ski-distance').text('Loading..')
-		  modal.find('.modal-title').text('Loading..')
-		  modal.find('.modal-body-location').text('Loading..')
-		  modal.find('.modal-map-summary').attr('src', '')
-
-		  $.get( "/activity", {access_token: '@session.get("token")', id: activityid} )
-			.done(function( data ) {
-			modal.find('.modal-title').text(data.name)
-			modal.find('.modal-body-location').text(data.location_city)
-			modal.find('.modal-map-summary').attr('src', 'http://maps.googleapis.com/maps/api/staticmap?sensor=false&size=150x150&path=weight:3|color:red|enc:' + data.map.summary_polyline)
-			
-			})
-			.fail(function() {
-			modal.find('.modal-title').text('')
-			modal.find('.modal-body-location').text('Error loading activity details, please try to refresh data')
-			});
-
-		  $.get( "/skimeanfulldata", {id: activityid} )
-			.done(function( data ) {
-			modal.find('.modal-body-real-ski-distance').text('Downhill distance ' + data.downhilled_distance + 'km')
-			})
-			.fail(function() {
-			modal.find('.modal-body-real-ski-distance').text('Cannot calculate real ski distance')
-			});
-
-			
-		})
-		</script>
-
-    <hr></hr>
-    <footer></footer>
-
-
-
-</div>
-
-	
-		}
+	} else {}
 
 }

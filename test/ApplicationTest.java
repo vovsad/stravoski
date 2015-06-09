@@ -1,73 +1,58 @@
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static play.mvc.Http.Status.OK;
+import static play.test.Helpers.GET;
+import static play.test.Helpers.contentAsString;
+import static play.test.Helpers.route;
+//import javaguide.tests.controllers.Application;
+
+
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-import controllers.routes;
-import org.junit.*;
+import com.google.common.collect.ImmutableMap;
 
-import play.mvc.*;
-import play.test.*;
-import play.data.DynamicForm;
-import play.data.validation.ValidationError;
-import play.data.validation.Constraints.RequiredValidator;
-import play.i18n.Lang;
-import play.libs.F;
-import play.libs.F.*;
+import controllers.Application;
 
-import static play.test.Helpers.*;
-import static org.fest.assertions.Assertions.*;
+import org.junit.Test;
+
+import play.mvc.Result;
+import play.test.FakeApplication;
+import play.test.Helpers;
+import play.test.WithApplication;
+import play.twirl.api.Content;
 
 
 /**
- *
- * Simple (JUnit) tests that can call all parts of a Play app.
- * If you are interested in mocking a whole application, see the wiki for more details.
- *
- */
-public class ApplicationTest {
+*
+* Simple (JUnit) tests that can call all parts of a play app.
+* If you are interested in mocking a whole application, see the wiki for more details.
+*
+*/
+public class ApplicationTest extends WithApplication {
+
+	 @Override
+	  protected FakeApplication provideFakeApplication() {
+	    return new FakeApplication(new java.io.File("."), Helpers.class.getClassLoader(),
+	        ImmutableMap.of("play.http.router", "javaguide.tests.Routes"), new ArrayList<String>(), null);
+	  }
+    
 
     @Test
-    public void simpleCheck() {
-        int a = 1 + 1;
-        assertThat(a).isEqualTo(2);
-    }
-
-    @Test
-    public void indexTemplateShouldContainTheStringThatIsPassedToIt() {
-        running(fakeApplication(), new Runnable() {
-            public void run() {
-                Content html = views.html.index.render("Your new application is ready.", Boolean.FALSE);
-                assertThat(contentType(html)).isEqualTo("text/html");
-                assertThat(contentAsString(html)).contains("Your new application is ready.");
-            }
-        });
-    }
-
-    @Test
-    public void indexShouldContainTheCorrectString() {
-        running(fakeApplication(), new Runnable() {
-            public void run() {
-                Result result = callAction(routes.ref.Application.index());
-                assertThat(status(result)).isEqualTo(OK);
-                assertThat(contentType(result)).isEqualTo("text/html");
-                assertThat(charset(result)).isEqualTo("utf-8");
-                assertThat(contentAsString(result)).contains("Hello Play Framework");
-            }
-        });
+    public void renderLogin() {
+    	Result result = new Application().index();
+        assertEquals(OK, result.status());
+        assertEquals("text/html", result.contentType());
+        assertTrue(contentAsString(result).contains("Stravoski uses Strava API to connect to your account"));
     }
     
     @Test
-    public void activitySkiedDistanceIsCalculated() {
-        running(fakeApplication(), new Runnable() {
-            public void run() {
-                Result result = callAction(routes.ref.Application.getSkiMeanfullData("265640103"));
-                assertThat(status(result)).isEqualTo(OK);
-                assertThat(contentType(result)).isEqualTo("text/html");
-                assertThat(charset(result)).isEqualTo("utf-8");
-                assertThat(contentAsString(result)).contains("downhilled_distance: 14");
-            }
-        });
+    public void getActivitiesJSON() {
+    	Result result = new Application().getActivities();
+        assertEquals(OK, result.status());
+        assertEquals("application/json", result.contentType());
     }
 
+
 }
+
+
