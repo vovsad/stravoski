@@ -10,16 +10,21 @@
         <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular.js"></script>
 	    <link rel='stylesheet' href='/assets/stylesheets/bootstrap.min.css'>
 	    <script type='text/javascript' src='/assets/javascripts/bootstrap.js'></script>
+	    <script type='text/javascript' src='/assets/javascripts/stravoskiscripts.js'></script>
 
     </head>
-    <body>
+    <body ng-app="StravoSki">
 
 <nav class="navbar navbar-inverse">
   <div class="container-fluid">
     <div class="navbar-header">
       <a class="navbar-brand" href="#">@title</a>
     </div>
-
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-2">
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="#" onclick="doSyncWithStrava()">Re-Sync</a></li>
+      </ul>
+	</div>
     <!-- <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-2">
       <form class="navbar-form navbar-left" role="search">
         <div class="form-group">

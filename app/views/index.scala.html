@@ -41,6 +41,16 @@
 			return false;
 			};
 	</script>
-	} else {}
+	} else {
+	<div ng-controller="ActivitiesCtrl">
+    	<ul ng-repeat="activity in activities" class="list-group">
+      		<li class="list-group-item">
+      			<span class="badge">{{activity.distance}} km</span>
+      			{{activity.name}}
+      			</li>
+    	</ul>
+  	</div>	
+	
+	}
 
 }

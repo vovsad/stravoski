@@ -6,10 +6,13 @@
 GET     /                           	controllers.Application.index()
 GET     /tokenexchange                  controllers.Application.tokenExchange(code)
 GET     /login						controllers.Application.login()
-GET     /dashboard						controllers.Application.dashboard()
+#GET     /dashboard						controllers.Application.dashboard()
 
 #JSONs
 GET     /getactivities						controllers.Application.getActivities()
+
+#Backgroud actions
+GET     /syncwithstrava						controllers.Application.getActivitiesSynced()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               	controllers.Assets.versioned(path="/public", file: Asset)
