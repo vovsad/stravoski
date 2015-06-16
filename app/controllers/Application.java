@@ -27,6 +27,7 @@ import play.libs.ws.WS;
 import play.libs.ws.WSResponse;
 import play.mvc.*;
 import views.html.*;
+import views.html.defaultpages.error;
 
 public class Application extends Controller {
 
@@ -50,7 +51,7 @@ public class Application extends Controller {
 		return redirect("/index");
 	}
 
-	private void syncStravaToDB() {
+	private Thread syncStravaToDB() {
 		final JStravaV3 strava = new JStravaV3(session("Access_token"));
 		final Athlete athlete = strava.getCurrentAthlete();
 
@@ -126,6 +127,8 @@ public class Application extends Controller {
 		};
 		
 		cacheThread.start();
+		
+		return cacheThread;
 	}
 
 	public Result login() {
@@ -148,8 +151,12 @@ public class Application extends Controller {
 		// .getCurrentAthleteActivities()));
 	}
 
-	public Result getActivitiesSynced() {
-		syncStravaToDB();
+	public Result getActivitiesSynced(){
+		try {
+			syncStravaToDB().join();
+		} catch (InterruptedException e) {
+			return status(1, "Cannot cache data from Strava");
+		}
 		return ok();
 	}
 
