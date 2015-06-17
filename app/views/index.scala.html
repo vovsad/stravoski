@@ -1,28 +1,36 @@
-@(isAuthenticated: Boolean)
+	@(isAuthenticated: Boolean)
 
 @main("stravoski") {
-
+<div class="col-md-8">
 	@if(!isAuthenticated){
     
-    <h1>Stravoski uses Strava API to connect to your account</h1>
+    <h2>Stravoski uses Strava API to connect to your account</h2>
     <p>By authorizing an application you are still under Strava's Terms of Service</p>
     
-	<p>Amongst other things, this application will be able to:</p>
-	<ul>
-		<li>Access your name, location and email address</li>
-		<li>Access your activity data</li>
-		<li>Display public data related to those activities</li>
-		<li>Read your public profile data</li>
-	</ul>
+	<div class="panel panel-success">
+  		<div class="panel-heading">
+    		<h3 class="panel-title">Amongst other things, this application will be able</h3>
+  		</div>
+  		<div class="panel-body">
+			<p>Access your name, location and email address</p>
+			<p>Access your activity data</p>
+			<p>Display public data related to those activities</p> 
+			<p>Read your public profile data</p>
+  		</div>
+	</div>
 	
-	<p>This application will not be able to:</p>
+	<div class="panel panel-warning">
+  		<div class="panel-heading">
+    		<h3 class="panel-title">This application will not be able</h3>
+  		</div>
+  		<div class="panel-body">
+	    	<p>Upload activities for you</p>
+			<p>See private data on your activities</p>
+			<p>Post comments or kudos for you</p>
+			<p>Change your profile information</p>
+  		</div>
+	</div>
 	
-	<ul>
-		<li>Upload activities for you</li>
-		<li>See private data on your activities</li>
-		<li>Post comments or kudos for you</li>
-		<li>Change your profile information</li>
-	</ul>
 	
 <form class="form-vertical">
   <fieldset>
@@ -45,12 +53,27 @@
 	<div ng-controller="ActivitiesCtrl">
     	<ul ng-repeat="activity in activities" class="list-group">
       		<li class="list-group-item">
-      			<span class="badge">{{activity.distance}} km</span>
+      			<span class="badge">{{activity.distance / 1000 | number:2}} km</span>
       			{{activity.name}}
       			</li>
     	</ul>
   	</div>	
 	
 	}
+</div>
+ <div class="col-md-4">
+ @if(isAuthenticated){
+
+	<div class="panel panel-default">
+		  <div class="panel-heading">Your skiing profile</div>
+		  <div class="panel-body">
+		    <p>Skiing seasons {{0}}<br/>
+		    Skied {{0.0}} km in current season and<br/>
+		    {{0.0}} km in last season</p>
+		    <p>Longest skiing day at {{2015}} with {{0.0}} km</p>
+		  </div>
+	</div> 	
+ 	}
+</div>
 
 }

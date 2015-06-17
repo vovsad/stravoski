@@ -4,6 +4,7 @@
 
 # Home page
 GET     /                           	controllers.Application.index()
+GET     /index                           	controllers.Application.index()
 GET     /tokenexchange                  controllers.Application.tokenExchange(code)
 GET     /login						controllers.Application.login()
 #GET     /dashboard						controllers.Application.dashboard()

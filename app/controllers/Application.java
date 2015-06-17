@@ -59,7 +59,8 @@ public class Application extends Controller {
 			public void run() {
 				Logger.debug("Thread: " + getName() + " running");
 
-				if (DBController.cachedActivitiesCount() == 0) {
+				if (DBController.cachedActivitiesCount() == 0 ||
+						!isActivitiesSyncked()) {
 
 					cacheAthlete();
 					cacheNewestAthleteActivities();
@@ -100,8 +101,7 @@ public class Application extends Controller {
 
 			private void cacheOldestAthleteActivities() {
 
-				String s = DBController.getMinActivityDate();
-				Long before = ZonedDateTime.parse(s,
+				Long before = ZonedDateTime.parse(DBController.getMinActivityDate(),
 						DateTimeFormatter.ISO_DATE_TIME).toEpochSecond();
 				List<Activity> activities = strava
 						.getCurrentAthleteActivitiesBeforeDate(before);
@@ -124,6 +124,16 @@ public class Application extends Controller {
 				}
 
 			}
+			
+			private Boolean isActivitiesSyncked() {
+				Logger.debug("Here we are");
+				Long after = ZonedDateTime.parse(DBController.getMaxActivityDate(),
+						DateTimeFormatter.ISO_DATE_TIME).toEpochSecond();
+				List<Activity> activities = strava
+						.getCurrentAthleteActivitiesAfterDate(after);
+
+				return activities.isEmpty();
+			}
 		};
 		
 		cacheThread.start();
@@ -136,21 +146,12 @@ public class Application extends Controller {
 	}
 
 	public Result getActivities() {
-		// ObjectNode activities = Json.newObject();
-
 		return ok(Json.toJson(Ebean.find(ActivityModel.class).
 				where("type ='AlpineSki'").
 				orderBy("id desc").
 				findList()));
-
-		// for(ActivityModel a : Ebean.find(ActivityModel.class).findList()){
-		//
-		// }
-
-		// return ok(Json.toJson(new JStravaV3(session("Access_token"))
-		// .getCurrentAthleteActivities()));
 	}
-
+	
 	public Result getActivitiesSynced(){
 		try {
 			syncStravaToDB().join();
