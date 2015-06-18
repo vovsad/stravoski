@@ -50,13 +50,16 @@
 			};
 	</script>
 	} else {
-	<div ng-controller="ActivitiesCtrl">
-    	<ul ng-repeat="activity in activities" class="list-group">
+	<div ng-controller="ActivitiesCtrl" class="panel panel-default">
+	  <div class="panel-heading">Your activities</div>
+	  <div class="panel-body">
+	   	<ul ng-repeat="activity in activities" class="list-group">
       		<li class="list-group-item">
       			<span class="badge">{{activity.distance / 1000 | number:2}} km</span>
       			{{activity.name}}
       			</li>
     	</ul>
+      </div>
   	</div>	
 	
 	}
@@ -64,13 +67,13 @@
  <div class="col-md-4">
  @if(isAuthenticated){
 
-	<div class="panel panel-default">
-		  <div class="panel-heading">Your skiing profile</div>
+	<div ng-controller="AthleteCtrl" class="panel panel-default">
+		  <div class="panel-heading">Skiing profile</div>
 		  <div class="panel-body">
 		    <p>Skiing seasons {{0}}<br/>
-		    Skied {{0.0}} km in current season and<br/>
-		    {{0.0}} km in last season</p>
-		    <p>Longest skiing day at {{2015}} with {{0.0}} km</p>
+		    Skied {{0.0}} km in current season,<br/>
+		    {{0.0}} km in last season and {{statistics.totalDistance | number:2}} km from beginning.</p>
+		    <p>Longest skiing day at {{statistics.longestDayDate | date}} with {{statistics.longestDay | number:2}} km</p>
 		  </div>
 	</div> 	
  	}

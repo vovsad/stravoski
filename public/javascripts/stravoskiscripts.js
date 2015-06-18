@@ -4,6 +4,17 @@
 
 var app = angular.module('StravoSki', ['ui.bootstrap']);
 
+app.controller("AthleteCtrl", function($scope, $http) {
+	  $http.get('/getathletestat').
+	    success(function(data, status, headers, config) {
+	      $scope.statistics = data;
+	    }).
+	    error(function(data, status, headers, config) {
+	    	$scope.message = "Something goes wrong";
+	    });
+	});
+
+
 app.controller("ActivitiesCtrl", function($scope, $http) {
   $http.get('/getactivities').
     success(function(data, status, headers, config) {

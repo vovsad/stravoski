@@ -146,10 +146,7 @@ public class Application extends Controller {
 	}
 
 	public Result getActivities() {
-		return ok(Json.toJson(Ebean.find(ActivityModel.class).
-				where("type ='AlpineSki'").
-				orderBy("id desc").
-				findList()));
+		return ok(Json.toJson(DBController.getSkiActivities()));
 	}
 	
 	public Result getActivitiesSynced(){
@@ -160,5 +157,30 @@ public class Application extends Controller {
 		}
 		return ok();
 	}
+	
+	public Result getAthleteStatistics() {
+		List<ActivityModel> activities = DBController.getSkiActivities();
+		
+		ObjectNode statistics = Json.newObject();
+		
+		float totalDistance = 0;
+		float longestDay = 0;
+		String longestDayDate = "";
+		
+		for (ActivityModel a : activities){
+			totalDistance += a.distance;
+			if(longestDay < a.distance){
+				longestDay = a.distance;
+				longestDayDate = a.start_date;
+			}
+			
+		}
+		statistics.put("totalDistance", totalDistance/1000);
+		statistics.put("longestDay", longestDay/1000);
+		statistics.put("longestDayDate", longestDayDate);
+	    
+		return ok(statistics);
+	}
+
 
 }

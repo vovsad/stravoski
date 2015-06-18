@@ -1,5 +1,9 @@
 package controllers;
 
+import java.util.List;
+
+import models.ActivityModel;
+
 import com.avaje.ebean.Ebean;
 
 import play.mvc.Controller;
@@ -13,7 +17,8 @@ public class DBController extends Controller {
 				.setMaxRows(1).findUnique().getString("min_start_date");
 	}
 
-	public static String getMaxActivityDate(){
+	public static String 
+	getMaxActivityDate(){
 		return Ebean
 				.createSqlQuery(
 						"select max(start_date) as max_start_date from activity_model")
@@ -26,6 +31,13 @@ public class DBController extends Controller {
 				.createSqlQuery(
 						"select count(*) as count from activity_model")
 				.setMaxRows(1).findUnique().getInteger("count");
+	}
+
+	public static List<ActivityModel> getSkiActivities() {
+		return Ebean.find(ActivityModel.class).
+				where("type ='AlpineSki'").
+				orderBy("id desc").
+				findList();
 	}
 
 }
