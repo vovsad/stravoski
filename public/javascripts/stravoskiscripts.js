@@ -27,47 +27,54 @@ app.controller("ActivitiesCtrl", function($scope, $http) {
 
 app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	  
-	//$scope.message = "Something goes wrong";
+	  $scope.modalDialog = function(title, body) {
+
+			var modalInstance = $modal.open({
+			      animation: $scope.animationsEnabled,
+			      templateUrl: 'modalContent.html',
+			      controller: 'ModalInstanceCtrl',
+			      resolve: {
+			        messageBody: function () {
+			        	return body;
+			        },
+			        messageTitle: function () {
+			        	return title;
+			        }
+			      }
+			    });
+
+			    modalInstance.result.then(function (selectedItem) {
+			      $scope.selected = selectedItem;
+			    }, function () {
+			      $log.info('Modal dismissed at: ' + new Date());
+			    });
+		};
+		
+	  $scope.modalDialogActivityDetails = function (a){
+		  var mapURL = 'http://maps.googleapis.com/maps/api/staticmap?sensor=false&size=150x150&path=weight:3|color:red|enc:';
+		  var details = 'Skiied ' + Math.round(a.distance/1000) + ' km ';
+		  if(a.location_city != null){
+		  	details += 'at ' + a.location_city;
+		  }else if(a.location_state != null){
+			  details += 'at ' + a.location_state;
+		  }
+		  details += ' for ' + Math.round(a.moving_time/3600) 
+		  				+ ':' + (Math.round(a.moving_time/60) - Math.round(a.moving_time/3600)*60) + ' moving time.';
+		  
+		  $scope.modalDialog(a.name, details);
+	  };
 	
 	  $scope.doSyncWithStrava = function () {
 		  
 	      	$http.get('/syncwithstrava').
 		    success(function(data, status, headers, config) {
-		    	$scope.messageTitle = 'Notification';
-		    	$scope.messageBody = 'Your Activities are just synced and cached';
+		    	$scope.modalDialog('Notification', 
+		    			'Your Activities are just synced and cached');
 		    }).
 		    error(function(data, status, headers, config) {
-		    	$scope.messageTitle = 'Error';
-		    	$scope.messageBody = 'Something goes wrong';
-		    }).
-		    then(function() {
-
-		    	var modalInstance = $modal.open({
-				      animation: $scope.animationsEnabled,
-				      templateUrl: 'modalContent.html',
-				      controller: 'ModalInstanceCtrl',
-				      resolve: {
-				        messageBody: function () {
-				        	return $scope.messageBody;
-				        },
-				        messageTitle: function () {
-				        	return $scope.messageTitle;
-				        }
-
-				      }
-				    });
-
-				    modalInstance.result.then(function (selectedItem) {
-				      $scope.selected = selectedItem;
-				    }, function () {
-				      $log.info('Modal dismissed at: ' + new Date());
-				    });
-		    }
-		    		);
-	      	
-		    
-
-		    
+		    	$scope.modalDialog('Error', 
+    			'Something goes wrong');
+		    });
 		  };
 
 });

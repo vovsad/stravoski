@@ -28,6 +28,7 @@ create table activity_model (
   comment_count             integer,
   athlete_count             integer,
   photo_count               integer,
+  map_id                    varchar(255),
   trainer                   tinyint(1) default 0,
   commute                   tinyint(1) default 0,
   manual                    tinyint(1) default 0,
@@ -45,6 +46,7 @@ create table activity_model (
   calories                  float,
   truncated                 integer,
   has_kudoed                tinyint(1) default 0,
+  constraint uq_activity_model_map_id unique (map_id),
   constraint pk_activity_model primary key (id))
 ;
 
@@ -69,6 +71,16 @@ create table athlete_model (
   constraint pk_athlete_model primary key (id))
 ;
 
+create table polyline_model (
+  id                        varchar(255) not null,
+  polyline                  varchar(255),
+  summary_polyline          varchar(1000),
+  resource_state            varchar(255),
+  constraint pk_polyline_model primary key (id))
+;
+
+alter table activity_model add constraint fk_activity_model_map_1 foreign key (map_id) references polyline_model (id) on delete restrict on update restrict;
+create index ix_activity_model_map_1 on activity_model (map_id);
 
 
 
@@ -79,6 +91,8 @@ SET FOREIGN_KEY_CHECKS=0;
 drop table activity_model;
 
 drop table athlete_model;
+
+drop table polyline_model;
 
 SET FOREIGN_KEY_CHECKS=1;
 

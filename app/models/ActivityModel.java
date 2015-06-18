@@ -4,9 +4,11 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.validation.Constraint;
 
 import org.jstrava.entities.activity.Activity;
@@ -51,7 +53,8 @@ public class ActivityModel extends Model {
     public int comment_count;
     public int athlete_count;
     public int photo_count;
-    public Polyline map;
+    @OneToOne(cascade = CascadeType.ALL)
+    public PolylineModel map;
     public boolean trainer;
     public boolean commute;
     public boolean manual;
@@ -101,7 +104,8 @@ public class ActivityModel extends Model {
 	    comment_count = a.getComment_count();
 	    athlete_count = a.getAthlete_count();
 	    photo_count = a.getPhoto_count();
-	    map = a.getMap();
+	    map = new PolylineModel();
+	    map.setPolyline(a.getMap());
 	    trainer = a.getTrainer();
 	    commute = a.getCommute();
 	    manual = a.getManual();
@@ -147,7 +151,7 @@ public class ActivityModel extends Model {
 	    a.setComment_count(comment_count);
 	    a.setAchievement_count(achievement_count);
 	    a.setPhoto_count(photo_count);
-	    a.setMap(map);
+	    a.setMap(map.getStravaPlyline());
 	    a.setTrainer(trainer);
 	    a.setCommute(commute);
 	    a.setManual(manual);
