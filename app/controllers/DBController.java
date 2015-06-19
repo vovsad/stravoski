@@ -35,6 +35,7 @@ public class DBController extends Controller {
 
 	public static List<ActivityModel> getSkiActivities() {
 		return Ebean.find(ActivityModel.class).
+				fetch("map").
 				where("type ='AlpineSki'").
 				orderBy("id desc").
 				findList();

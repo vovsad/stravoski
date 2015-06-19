@@ -56,7 +56,7 @@
 	   	<ul ng-repeat="activity in activities" class="list-group">
       		<li class="list-group-item">
       			<span class="badge">{{activity.distance / 1000 | number:2}} km</span>
-      			<a ng-click="modalDialogActivityDetails(activity)">{{activity.name}}</a>
+      			{{activity.start_date | date}} <a ng-click="modalDialogActivityDetails(activity)">{{activity.name}}</a>
       			</li>
     	</ul>
       </div>
