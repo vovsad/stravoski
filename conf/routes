@@ -11,7 +11,7 @@ GET     /login								controllers.Application.login()
 
 #JSONs
 GET     /getactivities						controllers.Application.getActivities()
-GET		/getathletestat							controllers.Application.getAthleteStatistics()
+GET		/getathletestat						controllers.Application.getAthleteStatistics()
 
 #Backgroud actions
 GET     /syncwithstrava						controllers.Application.getActivitiesSynced()
