@@ -13,22 +13,22 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 
 import play.Logger;
-import play.api.Routes;
 import play.mvc.Result;
 import play.test.FakeApplication;
 import play.test.Helpers;
 import play.test.WithApplication;
 import play.twirl.api.Content;
 
+
 public class ApplicationTest extends WithApplication {
+	
+
 
     @Test
     public void renderLogin() {
-    	Result result = new Application().index();
-    	Logger.debug(result.toString());
-        assertEquals(OK, result.status());
-        assertEquals("text/html", result.contentType());
-        //assertTrue(contentAsString(result).contains("Stravoski1 uses Strava API to connect to your account"));
+    	Content html = views.html.index.render(false);
+    	assertEquals("text/html", html.contentType());
+    	assertTrue(contentAsString(html).contains("Stravoski uses Strava API to connect to your account"));
     }
     
     @Test
