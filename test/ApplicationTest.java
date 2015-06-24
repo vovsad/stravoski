@@ -32,8 +32,23 @@ public class ApplicationTest extends WithApplication {
     }
     
     @Test
+    public void renderIndex() {
+    	Content html = views.html.index.render(true);
+    	assertEquals("text/html", html.contentType());
+    	assertTrue(contentAsString(html).contains("Your activities"));
+    }
+    
+    @Test
     public void getActivitiesJSON() {
     	Result result = new Application().getActivities();
+        assertEquals(OK, result.status());
+        assertEquals("application/json", result.contentType());
+    }
+    
+    @Test
+    public void getAthleteStatisticsJSON() {
+    	Result result = new Application().getAthleteStatistics();
+    	Logger.debug(contentAsString(result));
         assertEquals(OK, result.status());
         assertEquals("application/json", result.contentType());
     }
