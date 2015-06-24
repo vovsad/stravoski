@@ -9,3 +9,4 @@ target
 /.history
 /.sbtserver/
 /RUNNING_PID
+.cache-main
