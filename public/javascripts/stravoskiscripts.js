@@ -17,16 +17,39 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	};
 	$scope.loadAthleteStatistics();
 
+	$scope.currentPage = 0;
+	$scope.activitiesPerPage = 10;
+
 	$scope.loadActivities = function () {
 	  $http.get('/getactivities').
 	    success(function(data, status, headers, config) {
 	      $scope.activities = data;
+	      $scope.total = data.length;
+	      $scope.pagedActivities = $scope.activities.slice(
+	    		  $scope.currentPage*$scope.activitiesPerPage, 
+	    		  $scope.currentPage*$scope.activitiesPerPage + $scope.activitiesPerPage);
 	    }).
 	    error(function(data, status, headers, config) {
 	    	$scope.message = "Something goes wrong";
 	    });
 	};
 	$scope.loadActivities();
+	
+	$scope.loadMoreActivities = function() {
+		$scope.currentPage++;
+	    var newActivities = $scope.activities.slice(
+	    		$scope.currentPage*$scope.activitiesPerPage, 
+	    		$scope.currentPage*$scope.activitiesPerPage + $scope.activitiesPerPage);
+	    $scope.pagedActivities = $scope.pagedActivities.concat(newActivities);
+	};
+
+	$scope.nextPageDisabledClass = function() {
+		return $scope.currentPage === $scope.pageCount()-1 ? "hidden" : "";
+	};
+
+	$scope.pageCount = function() {
+		return Math.ceil($scope.total/$scope.activitiesPerPage);
+	};		
 
 
 
