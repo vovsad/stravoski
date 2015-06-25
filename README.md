@@ -8,5 +8,6 @@ This app works with Strava API and collects activities marked as Alpine Ski. Col
 App v0.1 is under development now, no live instance so far. 
 
 ## Plans
+1. Add user-specific season start date.
 1. Do Alpine Ski normalization based on maps or segments marked as lifts.
-1. Import from other trackers like Endomondo
+1. Import from other trackers like Endomondo.

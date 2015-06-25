@@ -40,5 +40,5 @@ public class DBController extends Controller {
 				orderBy("id desc").
 				findList();
 	}
-
+	
 }

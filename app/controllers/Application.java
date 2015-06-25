@@ -2,7 +2,9 @@ package controllers;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import models.ActivityModel;
 import models.AthleteModel;
@@ -178,9 +180,23 @@ public class Application extends Controller {
 		statistics.put("totalDistance", totalDistance/1000);
 		statistics.put("longestDay", longestDay/1000);
 		statistics.put("longestDayDate", longestDayDate);
-	    
+		statistics.put("skiedYearsHistory", getSkiSeasonsYears().size());
+		
+		
 		return ok(statistics);
 	}
-
+	
+	private Set<String> getSkiSeasonsYears(){
+		Set<String> years = new LinkedHashSet();  
+		
+		List<ActivityModel> activities = DBController.getSkiActivities();
+		for (ActivityModel a : activities){
+			years.add(Integer.toString(
+				ZonedDateTime.parse(a.start_date,
+					DateTimeFormatter.ISO_DATE_TIME).getYear()));
+			
+		}
+		return years;
+	}
 
 }
