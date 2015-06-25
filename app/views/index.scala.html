@@ -72,9 +72,10 @@
 		  <div class="panel-heading">Skiing profile</div>
 		  <div class="panel-body">
 		    <p>Your profile stores {{statistics.skiedYearsHistory}} years of skiing.<br/>
-		    Skied {{0.0}} km in current season,<br/>
-		    {{0.0}} km in last season and {{statistics.totalDistance | number:2}} km from beginning.</p>
-		    <p>Longest skiing day at {{statistics.longestDayDate | date}} with {{statistics.longestDay | number:2}} km</p>
+		    Skied {{statistics.skiedDaysThisSeason}} days with {{statistics.skiedKmThisSeason / 1000 | number:0}} km in current season
+		    <a href="#" data-toggle="tooltip" title="Season in our current version means year. However later we plan to add ability to customize meaning of seasons.">*</a>,<br/>
+		    {{statistics.skiedDaysLastSeason}} days with {{statistics.skiedKmLastSeason / 1000 | number:0}} km in last season and {{statistics.totalDistance | number:0}} km from beginning.</p>
+		    <p>Longest skiing day at {{statistics.longestDayDate | date}} with {{statistics.longestDay | number:0}} km</p>
 		  </div>
 	</div> 	
  	}

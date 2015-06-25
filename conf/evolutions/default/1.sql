@@ -1,6 +1,3 @@
-# --- Created by Ebean DDL
-# To stop Ebean DDL generation, remove this comment and start using Evolutions
-
 # --- !Ups
 
 create table activity_model (
@@ -46,9 +43,10 @@ create table activity_model (
   calories                  float,
   truncated                 integer,
   has_kudoed                tinyint(1) default 0,
+  start_date_asdate         datetime,
   constraint uq_activity_model_map_id unique (map_id),
   constraint pk_activity_model primary key (id))
-;
+ engine=InnoDB default charset=utf8;
 
 create table athlete_model (
   id                        integer auto_increment not null,
@@ -69,7 +67,7 @@ create table athlete_model (
   measurement_preference    varchar(255),
   email                     varchar(255),
   constraint pk_athlete_model primary key (id))
-;
+ engine=InnoDB default charset=utf8;
 
 create table polyline_model (
   id                        varchar(255) not null,
@@ -77,7 +75,7 @@ create table polyline_model (
   summary_polyline          varchar(1000),
   resource_state            varchar(255),
   constraint pk_polyline_model primary key (id))
-;
+ engine=InnoDB default charset=utf8;
 
 alter table activity_model add constraint fk_activity_model_map_1 foreign key (map_id) references polyline_model (id) on delete restrict on update restrict;
 create index ix_activity_model_map_1 on activity_model (map_id);

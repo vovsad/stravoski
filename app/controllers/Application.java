@@ -160,6 +160,7 @@ public class Application extends Controller {
 		return ok();
 	}
 	
+	//TODO: refactor me please
 	public Result getAthleteStatistics() {
 		List<ActivityModel> activities = DBController.getSkiActivities();
 		
@@ -168,35 +169,54 @@ public class Application extends Controller {
 		float totalDistance = 0;
 		float longestDay = 0;
 		String longestDayDate = "";
+		Set<String> years = new LinkedHashSet();
+		int daysThisSeason = 0;
+		int daysLastSeason = 0;
+		int kmThisSeason = 0;
+		int kmLastSeason = 0;
+
+		ZonedDateTime notTheSameDay = ZonedDateTime.now().plusDays(1);
+
 		
 		for (ActivityModel a : activities){
 			totalDistance += a.distance;
+			
 			if(longestDay < a.distance){
 				longestDay = a.distance;
 				longestDayDate = a.start_date;
 			}
 			
+			years.add(Integer.toString(
+					ZonedDateTime.parse(a.start_date,
+						DateTimeFormatter.ISO_DATE_TIME).getYear()));
+			
+			if(a.start_date_asdate.getYear() == ZonedDateTime.now().getYear() &&
+					a.start_date_asdate.getDayOfMonth() != notTheSameDay.getDayOfMonth()){
+				daysThisSeason++;
+				kmThisSeason += a.distance;
+			}
+
+			if(a.start_date_asdate.getYear() == ZonedDateTime.now().getYear() - 1 &&
+					a.start_date_asdate.getDayOfMonth() != notTheSameDay.getDayOfMonth()){
+				daysLastSeason++;
+				kmLastSeason += a.distance;
+			}
+			
+			notTheSameDay = a.start_date_asdate;
+			
 		}
 		statistics.put("totalDistance", totalDistance/1000);
 		statistics.put("longestDay", longestDay/1000);
 		statistics.put("longestDayDate", longestDayDate);
-		statistics.put("skiedYearsHistory", getSkiSeasonsYears().size());
-		
+		statistics.put("skiedYearsHistory", years.size());
+		statistics.put("skiedDaysThisSeason", daysThisSeason);
+		statistics.put("skiedDaysLastSeason", daysLastSeason);
+		statistics.put("skiedKmThisSeason", kmThisSeason);
+		statistics.put("skiedKmLastSeason", kmLastSeason);		
 		
 		return ok(statistics);
 	}
 	
-	private Set<String> getSkiSeasonsYears(){
-		Set<String> years = new LinkedHashSet();  
-		
-		List<ActivityModel> activities = DBController.getSkiActivities();
-		for (ActivityModel a : activities){
-			years.add(Integer.toString(
-				ZonedDateTime.parse(a.start_date,
-					DateTimeFormatter.ISO_DATE_TIME).getYear()));
-			
-		}
-		return years;
-	}
+
 
 }

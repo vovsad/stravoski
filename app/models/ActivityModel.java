@@ -1,6 +1,9 @@
 package models;
 
 import java.lang.reflect.Array;
+import java.sql.Date;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
@@ -79,6 +82,8 @@ public class ActivityModel extends Model {
 //    public List<SplitsMetric> splits_metric;
 //    public List<SplitsStandard> splits_standard;
 //    public List<SegmentEffort> best_efforts;
+
+    public ZonedDateTime start_date_asdate;
     
 	public ActivityModel(Activity a) {
 	    id = a.getId();
@@ -125,6 +130,9 @@ public class ActivityModel extends Model {
 	    calories = a.getCalories();
 	    truncated = a.getTruncated();
 	    has_kudoed = a.getHas_kudoed();
+	    
+	    start_date_asdate = ZonedDateTime.parse(start_date,
+				DateTimeFormatter.ISO_DATE_TIME);
 	}
 	
 	public Activity getActivity(){
