@@ -24,6 +24,7 @@ import org.jstrava.entities.athlete.Athlete;
 import org.jstrava.entities.segment.SegmentEffort;
 
 import com.avaje.ebean.Model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gson.annotations.SerializedName;
 
 import play.data.validation.*;
@@ -83,6 +84,7 @@ public class ActivityModel extends Model {
 //    public List<SplitsStandard> splits_standard;
 //    public List<SegmentEffort> best_efforts;
 
+    @JsonIgnore
     public ZonedDateTime start_date_asdate;
     public float downhill_distance;
     

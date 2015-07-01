@@ -202,7 +202,7 @@ Logger.debug("Activity: " + a.name + " Dist: " + a.distance);
 		} catch (InterruptedException e) {
 			return status(1, "Cannot cache data from Strava");
 		}
-		return ok("{updated: true}");
+		return ok();
 	}
 	
 	public Result getDownhillDistanceUpdated(){
@@ -211,7 +211,7 @@ Logger.debug("Activity: " + a.name + " Dist: " + a.distance);
 		} catch (InterruptedException e) {
 			return status(1, "Cannot cache data from Strava");
 		}
-		return ok("{updated: true}");
+		return ok();
 	}
 	
 	//TODO: refactor me please
