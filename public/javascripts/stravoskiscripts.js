@@ -84,14 +84,25 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	$scope.modalDialogActivityDetails = function (a){
 		var mapURL = 'http://maps.googleapis.com/maps/api/staticmap?sensor=false&size=150x150&path=weight:3|color:red|enc:';
 		mapURL += a.map.summary_polyline;
+		
+		var minutes = function(seconds){
+			var result = (Math.floor(seconds/60) - Math.floor(seconds/3600)*60);
+			return (result > 9)? result: '0' + result;
+		}
+		
+		var hours = function(seconds){
+			return Math.floor(seconds/3600);
+		}
 		var details = 'Skiied ' + Math.round(a.distance/1000) + ' km ';
 		if(a.location_city != null){
 			details += 'at ' + a.location_city;
 		}else if(a.location_state != null){
 			details += 'at ' + a.location_state;
 		}
-		details += ' for ' + Math.floor(a.moving_time/3600) 
-		  				+ ':' + (Math.floor(a.moving_time/60) - Math.floor(a.moving_time/3600)*60) + ' moving time. ';
+		details += ' for ' + hours(a.moving_time) 
+		  				+ ':' + minutes(a.moving_time) + ' moving time';
+		details += ' and ' + hours(a.elapsed_time) 
+				+ ':' + minutes(a.elapsed_time) + ' elapsed time. ';
 		
 		details += 'Downhill distance without ski lifts is ' + Math.round(a.downhill_distance/1000) + 'km .';
 		  
