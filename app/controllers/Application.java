@@ -15,26 +15,19 @@ import org.jstrava.connector.JStravaV3;
 import org.jstrava.entities.activity.Activity;
 import org.jstrava.entities.athlete.Athlete;
 
+import play.Logger;
+import play.libs.Json;
+import play.mvc.Controller;
+import play.mvc.Result;
+
 import com.avaje.ebean.Ebean;
-import com.avaje.ebean.Query;
-import com.avaje.ebean.RawSql;
-import com.avaje.ebean.RawSqlBuilder;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import play.*;
-import play.libs.Json;
-import play.libs.F.Function;
-import play.libs.ws.WS;
-import play.libs.ws.WSResponse;
-import play.mvc.*;
-import views.html.*;
-import views.html.defaultpages.error;
 
 public class Application extends Controller {
 
 	public Result index() {
-		return ok(index.render(session("Access_token") != null
+		return ok(views.html.index.render(session("Access_token") != null
 				&& !session("Access_token").isEmpty()));
 	}
 
@@ -168,8 +161,9 @@ public class Application extends Controller {
 		
 		float totalDistance = 0;
 		float longestDay = 0;
+		ActivityModel longestDayActivity = new ActivityModel();
 		String longestDayDate = "";
-		Set<String> years = new LinkedHashSet();
+		Set<String> years = new LinkedHashSet<String>();
 		int daysThisSeason = 0;
 		int daysLastSeason = 0;
 		int kmThisSeason = 0;
@@ -184,6 +178,7 @@ public class Application extends Controller {
 			if(longestDay < a.distance){
 				longestDay = a.distance;
 				longestDayDate = a.start_date;
+				longestDayActivity = a;
 			}
 			
 			years.add(Integer.toString(
@@ -207,6 +202,7 @@ public class Application extends Controller {
 		}
 		statistics.put("totalDistance", totalDistance/1000);
 		statistics.put("longestDay", longestDay/1000);
+		statistics.putPOJO("longestDayActivity", Json.toJson(longestDayActivity));
 		statistics.put("longestDayDate", longestDayDate);
 		statistics.put("skiedYearsHistory", years.size());
 		statistics.put("skiedDaysThisSeason", daysThisSeason);

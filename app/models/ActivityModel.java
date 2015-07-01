@@ -85,6 +85,8 @@ public class ActivityModel extends Model {
 
     public ZonedDateTime start_date_asdate;
     
+    public ActivityModel() {}
+    
 	public ActivityModel(Activity a) {
 	    id = a.getId();
 	    resource_state = a.getResource_state();
