@@ -44,6 +44,7 @@ create table activity_model (
   truncated                 integer,
   has_kudoed                tinyint(1) default 0,
   start_date_asdate         datetime,
+  downhill_distance          float,
   constraint uq_activity_model_map_id unique (map_id),
   constraint pk_activity_model primary key (id))
  engine=InnoDB default charset=utf8;

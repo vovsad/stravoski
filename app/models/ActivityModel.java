@@ -84,6 +84,7 @@ public class ActivityModel extends Model {
 //    public List<SegmentEffort> best_efforts;
 
     public ZonedDateTime start_date_asdate;
+    public float downhill_distance;
     
     public ActivityModel() {}
     
@@ -190,6 +191,12 @@ public class ActivityModel extends Model {
     
     public static final Finder<Long, ActivityModel> find =
             new Finder<Long, ActivityModel>(ActivityModel.class);
+
+    //http://stackoverflow.com/questions/11699757/ebean-is-not-doing-updates-its-trying-to-do-inserts-and-failing
+	public void setDownhill_distance(int i) {
+		downhill_distance = i;
+		
+	}
 
 
 }

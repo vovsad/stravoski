@@ -2,7 +2,11 @@ package controllers;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -14,6 +18,7 @@ import org.jstrava.authenticator.StravaAuthenticator;
 import org.jstrava.connector.JStravaV3;
 import org.jstrava.entities.activity.Activity;
 import org.jstrava.entities.athlete.Athlete;
+import org.jstrava.entities.stream.Stream;
 
 import play.Logger;
 import play.libs.Json;
@@ -136,6 +141,53 @@ public class Application extends Controller {
 		return cacheThread;
 	}
 
+	private Thread updateDownhillDistanceToDB() {
+		final JStravaV3 strava = new JStravaV3(session("Access_token"));
+
+		Thread updateThread = new Thread("updateDownhillDistance") {
+			public void run() {
+Logger.debug("Thread: " + getName() + " running");
+				for (ActivityModel a: DBController.getSkiActivities()){
+					if(a.downhill_distance == 0){
+Logger.debug("Activity: " + a.name + " Dist: " + a.distance);
+						a.setDownhill_distance(getDownhillDistance(a.id));
+						a.update();
+					}
+				}
+			}
+			
+		private int getDownhillDistance(int Id){
+			
+			final String[] types = {"distance", "altitude"}; 
+			final List<Stream> streams= strava.findActivityStreams(Id, types);
+	
+			List<SimpleEntry<Double, Double>> streamsDataOriginal = new LinkedList<>();
+			Iterator<Object> distance = streams.get(1).getData().iterator();
+			Iterator<Object> altitude = streams.get(0).getData().iterator();
+			for (; altitude.hasNext() && distance.hasNext();) {
+				streamsDataOriginal.add(new AbstractMap.SimpleEntry<>((Double)distance
+						.next(), (Double)altitude.next()));
+			}
+	
+			Double previousAltitudePoint = 0.0, previousDistancePoint = 0.0, downhillDistance = 0.0;
+			for (SimpleEntry<Double, Double> i : streamsDataOriginal) {
+	
+				if (i.getKey() <= previousAltitudePoint) {
+					downhillDistance += i.getValue() - previousDistancePoint;
+				}
+				previousAltitudePoint = i.getKey();
+				previousDistancePoint = i.getValue();
+	
+			}
+			return downhillDistance.intValue();
+			
+		}
+		};
+	updateThread.start();
+	
+	return updateThread;
+	}
+
 	public Result login() {
 		return redirect("https://www.strava.com/oauth/authorize?client_id=1455&redirect_uri=http://localhost:9000/tokenexchange&response_type=code");
 	}
@@ -150,7 +202,16 @@ public class Application extends Controller {
 		} catch (InterruptedException e) {
 			return status(1, "Cannot cache data from Strava");
 		}
-		return ok();
+		return ok("{updated: true}");
+	}
+	
+	public Result getDownhillDistanceUpdated(){
+		try {
+			updateDownhillDistanceToDB().join();
+		} catch (InterruptedException e) {
+			return status(1, "Cannot cache data from Strava");
+		}
+		return ok("{updated: true}");
 	}
 	
 	//TODO: refactor me please
@@ -212,6 +273,8 @@ public class Application extends Controller {
 		
 		return ok(statistics);
 	}
+	
+
 	
 
 

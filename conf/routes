@@ -15,6 +15,7 @@ GET		/getathletestat						controllers.Application.getAthleteStatistics()
 
 #Backgroud actions
 GET     /syncwithstrava						controllers.Application.getActivitiesSynced()
+GET     /updatetoski						controllers.Application.getDownhillDistanceUpdated()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               		controllers.Assets.versioned(path="/public", file: Asset)

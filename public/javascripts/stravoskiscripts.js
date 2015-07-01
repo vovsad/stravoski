@@ -91,7 +91,9 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 			details += 'at ' + a.location_state;
 		}
 		details += ' for ' + Math.floor(a.moving_time/3600) 
-		  				+ ':' + (Math.floor(a.moving_time/60) - Math.floor(a.moving_time/3600)*60) + ' moving time.';
+		  				+ ':' + (Math.floor(a.moving_time/60) - Math.floor(a.moving_time/3600)*60) + ' moving time. ';
+		
+		details += 'Downhill distance without ski lifts is ' + Math.round(a.downhill_distance/1000) + 'km .';
 		  
 		$scope.modalDialog(a.name, details, mapURL);
 	  };
