@@ -46,7 +46,6 @@ public class Application extends Controller {
 		AuthResponse authResponse = authenticator.getToken(code);
 
 		session("Access_token", authResponse.getAccess_token());
-		syncStravaToDB();
 
 		return redirect("/index");
 	}
@@ -146,10 +145,8 @@ public class Application extends Controller {
 
 		Thread updateThread = new Thread("updateDownhillDistance") {
 			public void run() {
-Logger.debug("Thread: " + getName() + " running");
 				for (ActivityModel a: DBController.getSkiActivities()){
 					if(a.downhill_distance == 0){
-Logger.debug("Activity: " + a.name + " Dist: " + a.distance);
 						a.setDownhill_distance(getDownhillDistance(a.id));
 						a.update();
 					}
@@ -193,6 +190,11 @@ Logger.debug("Activity: " + a.name + " Dist: " + a.distance);
 	}
 
 	public Result getActivities() {
+		try {
+			syncStravaToDB().join();
+		} catch (InterruptedException e) {
+			return status(1, "Cannot cache data from Strava");
+		}
 		return ok(Json.toJson(DBController.getSkiActivities()));
 	}
 	
@@ -217,8 +219,12 @@ Logger.debug("Activity: " + a.name + " Dist: " + a.distance);
 	//TODO: refactor me please
 	public Result getAthleteStatistics() {
 		List<ActivityModel> activities = DBController.getSkiActivities();
-		
 		ObjectNode statistics = Json.newObject();
+		
+		if(activities.isEmpty()){
+			statistics.put("isempty", true);
+			return ok(statistics);
+		}
 		
 		float totalDistance = 0;
 		float longestDay = 0;

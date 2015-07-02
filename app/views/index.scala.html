@@ -1,4 +1,4 @@
-	@(isAuthenticated: Boolean)
+@(isAuthenticated: Boolean)
 
 @main("stravoski") {
 <div class="col-md-8">
@@ -54,9 +54,30 @@
 			};
 	</script>
 	} else {
+	
+	<script type="text/ng-template" id="modalContent.html">
+        <div class="modal-header">
+	        <h4 class="modal-title">{{messageTitle}}</h3>
+    	</div>
+    	<div class="modal-body">
+			<div class="row">
+        		<div class="col-md-4">
+          			<img ng-src="{{messageImage}}" style="width: 150px ; height: 150px ;"/>
+        		</div>
+        		<div class="col-md-6">
+          			{{messageBody}}
+        		</div>
+      		</div>
+		</div>
+        <div class="modal-footer">
+	        <button class="btn btn-primary" ng-click="ok()">OK</button>
+    	</div>
+	</script>
+	
 	<div class="panel panel-default">
 	  <div class="panel-heading">Your activities</div>
 	  <div class="panel-body">
+	  	<p ng-hide="pagedActivities.length > 0">Your activities are being syncronized now, please keep calm and wait a bit.</p>
 	   	<ul ng-repeat="activity in pagedActivities" class="list-group">
       		<li class="list-group-item">
       			<span class="badge">{{activity.distance / 1000 | number:2}} km</span>
@@ -74,7 +95,7 @@
 
 	<div class="panel panel-default">
 		  <div class="panel-heading">Skiing profile</div>
-		  <div class="panel-body">
+		  <div class="panel-body" ng-hide="statistics.isempty">
 		    <p>Your profile stores {{statistics.skiedYearsHistory}} years of skiing.<br/>
 		    Skied <strong>{{statistics.skiedDaysThisSeason}} days</strong> with <strong>{{statistics.skiedKmThisSeason / 1000 | number:0}} km</strong> in <strong>current season</strong>
 		    <a href="#" data-toggle="tooltip" title="Season in our current version means year. However later we plan to add ability to customize meaning of seasons.">*</a>,<br/>
