@@ -12,6 +12,7 @@ import java.util.Set;
 
 import models.ActivityModel;
 import models.AthleteModel;
+//import controllers.DBController;
 
 import org.jstrava.authenticator.AuthResponse;
 import org.jstrava.authenticator.StravaAuthenticator;
@@ -26,11 +27,10 @@ import play.mvc.Controller;
 import play.mvc.Result;
 
 import com.avaje.ebean.Ebean;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class Application extends Controller {
-
+	
 	public Result index() {
 		return ok(views.html.index.render(session("Access_token") != null
 				&& !session("Access_token").isEmpty()));
@@ -50,94 +50,95 @@ public class Application extends Controller {
 		return redirect("/index");
 	}
 
-	private Thread syncStravaToDB() {
+	private void syncStravaToDB() {
+
+		if (DBController.cachedActivitiesCount() == 0 ||
+				!isActivitiesSyncked()) {
+
+			cacheAthlete();
+			cacheNewestAthleteActivities();
+		}
+	}
+
+	private void cacheAthlete() {
 		final JStravaV3 strava = new JStravaV3(session("Access_token"));
 		final Athlete athlete = strava.getCurrentAthlete();
 
-		Thread cacheThread = new Thread("GetCachedActivities") {
-			public void run() {
-				Logger.debug("Thread: " + getName() + " running");
+		
+		AthleteModel athleteDB = Ebean.find(AthleteModel.class, athlete.getId());
 
-				if (DBController.cachedActivitiesCount() == 0 ||
-						!isActivitiesSyncked()) {
+		if (athleteDB == null) {
+			athleteDB = new AthleteModel(athlete);
+			athleteDB.save();
+		} else if (!athleteDB.updated_at
+				.equals(athlete.getUpdated_at())) {
+			athleteDB = new AthleteModel(athlete);
+			athleteDB.update();
+		}
+	}
 
-					cacheAthlete();
-					cacheNewestAthleteActivities();
-				}
+	private void cacheNewestAthleteActivities() {
+		final JStravaV3 strava = new JStravaV3(session("Access_token"));
+		
+		for (Activity a : strava.getCurrentAthleteActivities()) {
+			Logger.debug(a.toString());
+
+			ActivityModel activityDB = Ebean.find(ActivityModel.class,
+					a.getId());
+
+			if (activityDB == null) {
+				activityDB = new ActivityModel(a);
+				activityDB.save();
 			}
 
-			private void cacheAthlete() {
-				AthleteModel athleteDB = Ebean.find(AthleteModel.class,
-						athlete.getId());
+		}
 
-				if (athleteDB == null) {
-					athleteDB = new AthleteModel(athlete);
-					athleteDB.save();
-				} else if (!athleteDB.updated_at
-						.equals(athlete.getUpdated_at())) {
-					athleteDB = new AthleteModel(athlete);
-					athleteDB.update();
-				}
-			}
+		cacheOldestAthleteActivities();
 
-			private void cacheNewestAthleteActivities() {
-				for (Activity a : strava.getCurrentAthleteActivities()) {
-					Logger.debug(a.toString());
+	}
 
-					ActivityModel activityDB = Ebean.find(ActivityModel.class,
-							a.getId());
+	private void cacheOldestAthleteActivities() {
+		final JStravaV3 strava = new JStravaV3(session("Access_token"));
 
-					if (activityDB == null) {
-						activityDB = new ActivityModel(a);
-						activityDB.save();
-					}
+		Long before = ZonedDateTime.parse(DBController.getMinActivityDate(),
+				DateTimeFormatter.ISO_DATE_TIME).toEpochSecond();
+		List<Activity> activities = strava
+				.getCurrentAthleteActivitiesBeforeDate(before);
 
-				}
+		if (!activities.isEmpty()) {
+			for (Activity a : activities) {
+				Logger.debug(a.toString());
 
-				cacheOldestAthleteActivities();
+				ActivityModel activityDB = Ebean.find(
+						ActivityModel.class, a.getId());
 
-			}
-
-			private void cacheOldestAthleteActivities() {
-
-				Long before = ZonedDateTime.parse(DBController.getMinActivityDate(),
-						DateTimeFormatter.ISO_DATE_TIME).toEpochSecond();
-				List<Activity> activities = strava
-						.getCurrentAthleteActivitiesBeforeDate(before);
-
-				if (!activities.isEmpty()) {
-					for (Activity a : activities) {
-						Logger.debug(a.toString());
-
-						ActivityModel activityDB = Ebean.find(
-								ActivityModel.class, a.getId());
-
-						if (activityDB == null) {
-							activityDB = new ActivityModel(a);
-							activityDB.save();
-						}
-
-					}
-
-					cacheOldestAthleteActivities();
+				if (activityDB == null) {
+					activityDB = new ActivityModel(a);
+					activityDB.save();
 				}
 
 			}
+
+			cacheOldestAthleteActivities();
+		}else{
+			Logger.debug("Calculate Ski without lifts");
 			
-			private Boolean isActivitiesSyncked() {
-				Logger.debug("Here we are");
-				Long after = ZonedDateTime.parse(DBController.getMaxActivityDate(),
-						DateTimeFormatter.ISO_DATE_TIME).toEpochSecond();
-				List<Activity> activities = strava
-						.getCurrentAthleteActivitiesAfterDate(after);
+			updateDownhillDistanceToDB();
+			
+		}
 
-				return activities.isEmpty();
-			}
-		};
+	}
+	
+	private Boolean isActivitiesSyncked() {
+		final JStravaV3 strava = new JStravaV3(session("Access_token"));
 		
-		cacheThread.start();
-		
-		return cacheThread;
+		Logger.debug("Here we are");
+		Long after = ZonedDateTime.parse(DBController.getMaxActivityDate(),
+				DateTimeFormatter.ISO_DATE_TIME).toEpochSecond();
+		List<Activity> activities = strava
+				.getCurrentAthleteActivitiesAfterDate(after);
+
+		return activities.isEmpty();
 	}
 
 	private Thread updateDownhillDistanceToDB() {
@@ -190,20 +191,12 @@ public class Application extends Controller {
 	}
 
 	public Result getActivities() {
-		try {
-			syncStravaToDB().join();
-		} catch (InterruptedException e) {
-			return status(1, "Cannot cache data from Strava");
-		}
+		syncStravaToDB();
 		return ok(Json.toJson(DBController.getSkiActivities()));
 	}
 	
 	public Result getActivitiesSynced(){
-		try {
-			syncStravaToDB().join();
-		} catch (InterruptedException e) {
-			return status(1, "Cannot cache data from Strava");
-		}
+		syncStravaToDB();
 		return ok();
 	}
 	

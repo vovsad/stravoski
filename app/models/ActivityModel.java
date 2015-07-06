@@ -105,10 +105,10 @@ public class ActivityModel extends Model {
 	    start_date = a.getStart_date();
 	    start_date_local = a.getStart_date_local();
 	    time_zone = a.getTime_zone();
-	    start_lat = a.getStart_latlng()[0];
-	    start_lng = a.getStart_latlng()[1];
-	    end_lat = a.getEnd_latlng()[0];
-	    end_lng = a.getEnd_latlng()[1];
+	    start_lat = (a.getStart_latlng() == null)? "0": a.getStart_latlng()[0];
+	    start_lng = (a.getStart_latlng() == null)? "0": a.getStart_latlng()[1];
+	    end_lat = (a.getEnd_latlng() == null)? "0": a.getEnd_latlng()[0];
+	    end_lng = (a.getEnd_latlng() == null)? "0": a.getEnd_latlng()[1];
 	    location_city = a.getLocation_city();
 	    location_state = a.getLocation_state();
 	    achievement_count = a.getAchievement_count();
