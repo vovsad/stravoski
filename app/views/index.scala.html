@@ -1,4 +1,4 @@
-@(isAuthenticated: Boolean)
+		@(isAuthenticated: Boolean)
 
 @main("stravoski") {
 <div class="col-md-8">
@@ -35,18 +35,23 @@
   		</div>
 	</div>
 	
-	
-<form class="form-vertical">
-  <fieldset>
-    <legend>Continue with login</legend>
-
-	<div class="form-group">
-		<button id="logInWithStrava" class="btn btn-primary btn-lg">
-		Log In With Strava
-		</button>
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title">Continue with login</h3>
+		</div>
+		<div class="panel-body">	
+			<form class="form-vertical">
+			  <fieldset>
+				<div class="form-group">
+					<button id="logInWithStrava" class="btn btn-primary btn-lg">
+					Log In With Strava
+					</button>
+				</div>
+				</fieldset>
+			</form>
+		</div>
 	</div>
-	</fieldset>
-	</form>
+	
 	<script type="text/javascript">
 		document.getElementById("logInWithStrava").onclick = function() {
 			location.href = "/login";
@@ -84,8 +89,9 @@
       			{{activity.start_date | date}} <a ng-click="modalDialogActivityDetails(activity)">{{activity.name}}</a>
       			</li>
     	</ul>
+    	<center>
     	<button class="btn" href="#" ng-class="nextPageDisabledClass()" ng-click="loadMoreActivities()">Load More</button>
-    	</pagination>
+    	</center>
       </div>
   	</div>	
 	}
