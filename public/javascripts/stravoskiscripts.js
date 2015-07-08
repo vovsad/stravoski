@@ -20,7 +20,7 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	        	return title;
 	        },
 	        messageImage: function () {
-	        	return image;
+	        	return typeof image === 'undefined'? '':image;
 	        }
 	      }
 	    });
