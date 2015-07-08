@@ -6,6 +6,7 @@ var app = angular.module('StravoSki', ['ui.bootstrap']);
 
 app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	
+	$scope.isLoaded = false;
 	$scope.modalDialog = function(title, body, image) {
 		var modalInstance = $modal.open({
 		      animation: $scope.animationsEnabled,
@@ -83,6 +84,7 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	      $scope.pagedActivities = $scope.activities.slice(
 	    		  $scope.currentPage*$scope.activitiesPerPage, 
 	    		  $scope.currentPage*$scope.activitiesPerPage + $scope.activitiesPerPage);
+	      $scope.isLoaded = true;
 	    }).
 	    error(function(data, status, headers, config) {
 	    	$scope.message = "Something goes wrong";
@@ -121,6 +123,10 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	    	$scope.modalDialog('Error', 
 			'Something goes wrong');
 	    });
+	};
+	$scope.doLogout = function () {
+		$location.path('/logout');
+	   	$scope.isLoaded = false;
 	};
 
 });

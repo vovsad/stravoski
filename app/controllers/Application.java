@@ -189,6 +189,11 @@ public class Application extends Controller {
 	public Result login() {
 		return redirect("https://www.strava.com/oauth/authorize?client_id=1455&redirect_uri=http://localhost:9000/tokenexchange&response_type=code");
 	}
+	
+	public Result logout(){
+		session("Access_token", "");
+		return redirect("/index");
+	}
 
 	public Result getActivities() {
 		syncStravaToDB();

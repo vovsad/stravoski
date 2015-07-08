@@ -82,7 +82,7 @@
 	<div class="panel panel-default">
 	  <div class="panel-heading">Your activities</div>
 	  <div class="panel-body">
-	  	<p ng-hide="pagedActivities.length > 0">Your activities are being syncronized now, please keep calm and wait a bit.</p>
+	  	<p ng-hide="isLoaded">Your activities are being syncronized now, please keep calm and wait a bit.</p>
 	   	<ul ng-repeat="activity in pagedActivities" class="list-group">
       		<li class="list-group-item">
       			<span class="badge">{{activity.distance / 1000 | number:2}} km</span>

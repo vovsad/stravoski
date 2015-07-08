@@ -7,6 +7,7 @@ GET     /                           		controllers.Application.index()
 GET     /index                           	controllers.Application.index()
 GET     /tokenexchange                  	controllers.Application.tokenExchange(code)
 GET     /login								controllers.Application.login()
+GET     /logout								controllers.Application.logout()
 #GET     /dashboard							controllers.Application.dashboard()
 
 #JSONs
