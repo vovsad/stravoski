@@ -207,7 +207,7 @@ public class Application extends Controller {
 		if(syncStravaToDB()){
 			return ok(Json.toJson(DBController.getSkiActivities(session("Athlete_id"))));
 		}else{
-			return unauthorized("{unauthorized: true}");
+			return unauthorized("{\"unauthorized\": true}");
 		}
 	}
 	
