@@ -51,10 +51,10 @@ public class Application extends Controller {
 		return redirect("/index");
 	}
 
-	private void syncStravaToDB() {
+	private boolean syncStravaToDB() {
 		
 		if(session("Access_token") == null 
-				|| session("Access_token").isEmpty()) return;
+				|| session("Access_token").isEmpty()) return false;
 
 		if (DBController.cachedActivitiesCount(session("Athlete_id")) == 0 ||
 				!isActivitiesSyncked()) {
@@ -62,6 +62,8 @@ public class Application extends Controller {
 			cacheAthlete();
 			cacheNewestAthleteActivities();
 		}
+		
+		return true;
 	}
 
 	private void cacheAthlete() {
@@ -202,10 +204,11 @@ public class Application extends Controller {
 	}
 
 	public Result getActivities() {
-		//TODO: add 		if(session("Access_token") == null || session("Access_token").isEmpty()) return false;
-		//and athlete id to query
-		syncStravaToDB();
-		return ok(Json.toJson(DBController.getSkiActivities(session("Athlete_id"))));
+		if(syncStravaToDB()){
+			return ok(Json.toJson(DBController.getSkiActivities(session("Athlete_id"))));
+		}else{
+			return unauthorized("{unauthorized: true}");
+		}
 	}
 	
 	public Result getActivitiesSynced(){
