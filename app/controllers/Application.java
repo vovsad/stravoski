@@ -46,13 +46,17 @@ public class Application extends Controller {
 		AuthResponse authResponse = authenticator.getToken(code);
 
 		session("Access_token", authResponse.getAccess_token());
+		session("Athlete_id", Long.toString(authResponse.getAthlete().getId()));
 
 		return redirect("/index");
 	}
 
 	private void syncStravaToDB() {
+		
+		if(session("Access_token") == null 
+				|| session("Access_token").isEmpty()) return;
 
-		if (DBController.cachedActivitiesCount() == 0 ||
+		if (DBController.cachedActivitiesCount(session("Athlete_id")) == 0 ||
 				!isActivitiesSyncked()) {
 
 			cacheAthlete();
@@ -100,7 +104,7 @@ public class Application extends Controller {
 	private void cacheOldestAthleteActivities() {
 		final JStravaV3 strava = new JStravaV3(session("Access_token"));
 
-		Long before = ZonedDateTime.parse(DBController.getMinActivityDate(),
+		Long before = ZonedDateTime.parse(DBController.getMinActivityDate(session("Athlete_id")),
 				DateTimeFormatter.ISO_DATE_TIME).toEpochSecond();
 		List<Activity> activities = strava
 				.getCurrentAthleteActivitiesBeforeDate(before);
@@ -130,10 +134,10 @@ public class Application extends Controller {
 	}
 	
 	private Boolean isActivitiesSyncked() {
+		
 		final JStravaV3 strava = new JStravaV3(session("Access_token"));
 		
-		Logger.debug("Here we are");
-		Long after = ZonedDateTime.parse(DBController.getMaxActivityDate(),
+		Long after = ZonedDateTime.parse(DBController.getMaxActivityDate(session("Athlete_id")),
 				DateTimeFormatter.ISO_DATE_TIME).toEpochSecond();
 		List<Activity> activities = strava
 				.getCurrentAthleteActivitiesAfterDate(after);
@@ -146,7 +150,8 @@ public class Application extends Controller {
 
 		Thread updateThread = new Thread("updateDownhillDistance") {
 			public void run() {
-				for (ActivityModel a: DBController.getSkiActivities()){
+				for (ActivityModel a: DBController.getSkiActivities(
+										Long.toString(strava.getCurrentAthlete().getId()))){
 					if(a.downhill_distance == 0){
 						a.setDownhill_distance(getDownhillDistance(a.id));
 						a.update();
@@ -192,12 +197,15 @@ public class Application extends Controller {
 	
 	public Result logout(){
 		session("Access_token", "");
+		session("Athlete_id", "");
 		return redirect("/index");
 	}
 
 	public Result getActivities() {
+		//TODO: add 		if(session("Access_token") == null || session("Access_token").isEmpty()) return false;
+		//and athlete id to query
 		syncStravaToDB();
-		return ok(Json.toJson(DBController.getSkiActivities()));
+		return ok(Json.toJson(DBController.getSkiActivities(session("Athlete_id"))));
 	}
 	
 	public Result getActivitiesSynced(){
@@ -216,7 +224,7 @@ public class Application extends Controller {
 	
 	//TODO: refactor me please
 	public Result getAthleteStatistics() {
-		List<ActivityModel> activities = DBController.getSkiActivities();
+		List<ActivityModel> activities = DBController.getSkiActivities(session("Athlete_id"));
 		ObjectNode statistics = Json.newObject();
 		
 		if(activities.isEmpty()){

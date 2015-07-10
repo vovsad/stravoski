@@ -5,6 +5,7 @@ create table activity_model (
   resource_state            integer,
   external_id               varchar(255),
   upload_id                 integer,
+  athlete_id                integer,
   name                      varchar(255),
   distance                  float,
   moving_time               integer,

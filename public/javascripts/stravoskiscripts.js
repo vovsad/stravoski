@@ -85,6 +85,7 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	    		  $scope.currentPage*$scope.activitiesPerPage, 
 	    		  $scope.currentPage*$scope.activitiesPerPage + $scope.activitiesPerPage);
 	      $scope.isLoaded = true;
+	      $scope.loadAthleteStatistics();
 	    }).
 	    error(function(data, status, headers, config) {
 	    	$scope.message = "Something goes wrong";
@@ -124,6 +125,7 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 			'Something goes wrong');
 	    });
 	};
+
 	$scope.doLogout = function () {
 		$location.path('/logout');
 	   	$scope.isLoaded = false;

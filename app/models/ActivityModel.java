@@ -23,6 +23,7 @@ import org.jstrava.entities.activity.SplitsStandard;
 import org.jstrava.entities.athlete.Athlete;
 import org.jstrava.entities.segment.SegmentEffort;
 
+import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gson.annotations.SerializedName;
@@ -38,7 +39,7 @@ public class ActivityModel extends Model {
     public String external_id;
     public int upload_id;
     @Constraints.Required
-    public Athlete athlete;/*Simple Athlete representation with just id*/
+    public int athlete_id;/*Simple Athlete representation with just id*/
     public String name;
     public float distance;
     public int moving_time;
@@ -95,7 +96,7 @@ public class ActivityModel extends Model {
 	    resource_state = a.getResource_state();
 	    external_id = a.getExternal_id();
 	    upload_id = a.getUpload_id();
-	    athlete = a.getAthlete();//.getId();/*Simple Athlete representation with just id*/
+	    athlete_id = a.getAthlete().getId();//.getId();/*Simple Athlete representation with just id*/
 	    name = a.getName();
 	    distance = a.getDistance();
 	    moving_time = a.getMoving_time();
@@ -147,7 +148,7 @@ public class ActivityModel extends Model {
 		a.setResource_state(resource_state);
 		a.setExternal_id(external_id);
 		a.setUpload_id(upload_id);
-		a.setAthlete(athlete);
+		a.setAthlete(Ebean.find(AthleteModel.class, athlete_id).getAthlete());
 		a.setName(name);
 		a.setDistance(distance);
 		a.setMoving_time(moving_time);
