@@ -14,6 +14,7 @@ import models.ActivityModel;
 import models.AthleteModel;
 //import controllers.DBController;
 
+
 import org.jstrava.authenticator.AuthResponse;
 import org.jstrava.authenticator.StravaAuthenticator;
 import org.jstrava.connector.JStravaV3;
@@ -25,6 +26,7 @@ import play.Logger;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import play.mvc.WebSocket;
 
 import com.avaje.ebean.Ebean;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -53,11 +55,7 @@ public class Application extends Controller {
 
 	private boolean syncStravaToDB() {
 		
-		if(session("Access_token") == null 
-				|| session("Access_token").isEmpty()) return false;
-
-		if (DBController.cachedActivitiesCount(session("Athlete_id")) == 0 ||
-				!isActivitiesSyncked()) {
+		if (!isLastActivitiesLoaded()) {
 
 			cacheAthlete();
 			cacheNewestAthleteActivities();
@@ -126,16 +124,20 @@ public class Application extends Controller {
 			}
 
 			cacheOldestAthleteActivities();
-		}else{
-			Logger.debug("Calculate Ski without lifts");
-			
-			updateDownhillDistanceToDB();
-			
 		}
 
 	}
 	
-	private Boolean isActivitiesSyncked() {
+	public Result isDataSynced(){
+		if(session("Access_token") == null 
+				|| session("Access_token").isEmpty()) return unauthorized("{\"unauthorized\": true}");
+
+		return ok("{\"isDataSynced\": " + isLastActivitiesLoaded() + "}");
+	}
+	
+	private Boolean isLastActivitiesLoaded() {
+		
+		if(DBController.cachedActivitiesCount(session("Athlete_id")) == 0) return false;
 		
 		final JStravaV3 strava = new JStravaV3(session("Access_token"));
 		
@@ -147,51 +149,55 @@ public class Application extends Controller {
 		return activities.isEmpty();
 	}
 
-	private Thread updateDownhillDistanceToDB() {
-		final JStravaV3 strava = new JStravaV3(session("Access_token"));
+	public Result getDownhillDistanceUpdated() {
+		Logger.debug("Calculate Ski without lifts");
 
-		Thread updateThread = new Thread("updateDownhillDistance") {
-			public void run() {
-				for (ActivityModel a: DBController.getSkiActivities(
-										Long.toString(strava.getCurrentAthlete().getId()))){
-					if(a.downhill_distance == 0){
-						a.setDownhill_distance(getDownhillDistance(a.id));
-						a.update();
-					}
-				}
+		final JStravaV3 strava = new JStravaV3(session("Access_token"));
+		Boolean isAnythingUpdated = false;
+
+		for (ActivityModel a: DBController.getSkiActivities(
+								Long.toString(strava.getCurrentAthlete().getId()))){
+			if(a.downhill_distance == 0){
+				a.setDownhill_distance(getDownhillDistance(a.id));
+				a.update();
+				isAnythingUpdated = true;
 			}
-			
-		private int getDownhillDistance(int Id){
-			
-			final String[] types = {"distance", "altitude"}; 
-			final List<Stream> streams= strava.findActivityStreams(Id, types);
-	
-			List<SimpleEntry<Double, Double>> streamsDataOriginal = new LinkedList<>();
-			Iterator<Object> distance = streams.get(1).getData().iterator();
-			Iterator<Object> altitude = streams.get(0).getData().iterator();
-			for (; altitude.hasNext() && distance.hasNext();) {
-				streamsDataOriginal.add(new AbstractMap.SimpleEntry<>((Double)distance
-						.next(), (Double)altitude.next()));
-			}
-	
-			Double previousAltitudePoint = 0.0, previousDistancePoint = 0.0, downhillDistance = 0.0;
-			for (SimpleEntry<Double, Double> i : streamsDataOriginal) {
-	
-				if (i.getKey() <= previousAltitudePoint) {
-					downhillDistance += i.getValue() - previousDistancePoint;
-				}
-				previousAltitudePoint = i.getKey();
-				previousDistancePoint = i.getValue();
-	
-			}
-			return downhillDistance.intValue();
-			
 		}
-		};
-	updateThread.start();
-	
-	return updateThread;
+		
+		return ok("{\"isAnythingUpdated\":" + isAnythingUpdated + "}");
+		
+		}
+			
+	private int getDownhillDistance(int Id){
+		final JStravaV3 strava = new JStravaV3(session("Access_token"));
+		
+		Logger.debug("Calculating downhill distance for " + Long.toString(Id));
+		
+		final String[] types = {"distance", "altitude"}; 
+		final List<Stream> streams= strava.findActivityStreams(Id, types);
+
+		List<SimpleEntry<Double, Double>> streamsDataOriginal = new LinkedList<>();
+		Iterator<Object> distance = streams.get(1).getData().iterator();
+		Iterator<Object> altitude = streams.get(0).getData().iterator();
+		for (; altitude.hasNext() && distance.hasNext();) {
+			streamsDataOriginal.add(new AbstractMap.SimpleEntry<>((Double)distance
+					.next(), (Double)altitude.next()));
+		}
+
+		Double previousAltitudePoint = 0.0, previousDistancePoint = 0.0, downhillDistance = 0.0;
+		for (SimpleEntry<Double, Double> i : streamsDataOriginal) {
+
+			if (i.getKey() <= previousAltitudePoint) {
+				downhillDistance += i.getValue() - previousDistancePoint;
+			}
+			previousAltitudePoint = i.getKey();
+			previousDistancePoint = i.getValue();
+
+		}
+		return downhillDistance.intValue();
+		
 	}
+	
 
 	public Result login() {
 		return redirect("https://www.strava.com/oauth/authorize?client_id=1455&redirect_uri=http://localhost:9000/tokenexchange&response_type=code");
@@ -204,10 +210,13 @@ public class Application extends Controller {
 	}
 
 	public Result getActivities() {
-		if(syncStravaToDB()){
+		if(session("Access_token") == null 
+				|| session("Access_token").isEmpty()) return unauthorized("{\"unauthorized\": true}");
+		
+		if(isLastActivitiesLoaded()){
 			return ok(Json.toJson(DBController.getSkiActivities(session("Athlete_id"))));
 		}else{
-			return unauthorized("{\"unauthorized\": true}");
+			return ok("{\"NoActivities\": true}");
 		}
 	}
 	
@@ -216,14 +225,6 @@ public class Application extends Controller {
 		return ok();
 	}
 	
-	public Result getDownhillDistanceUpdated(){
-		try {
-			updateDownhillDistanceToDB().join();
-		} catch (InterruptedException e) {
-			return status(1, "Cannot cache data from Strava");
-		}
-		return ok();
-	}
 	
 	//TODO: refactor me please
 	public Result getAthleteStatistics() {
@@ -289,8 +290,4 @@ public class Application extends Controller {
 		return ok(statistics);
 	}
 	
-
-	
-
-
 }

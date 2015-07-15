@@ -82,7 +82,13 @@
 	<div class="panel panel-default">
 	  <div class="panel-heading">Your activities</div>
 	  <div class="panel-body">
-	  	<p ng-hide="isLoaded">Your activities are being syncronized now, please keep calm and wait a bit.</p>
+	  	<div ng-show="isLoadingActivities" class="alert alert-dismissible alert-info">
+  			<strong>Heads up!</strong> Your activities are being syncronized now, please keep calm and wait a bit.
+		</div>
+	  	<div ng-show="isUpdatingSkiTracks" class="alert alert-dismissible alert-info">
+  			<strong>We still are doing some magic in background.</strong> Your ski activities are being processing now, it can take some time. You can use the system however skied distanse without lifts will remain as zero till the end of this process.
+		</div>
+	  
 	   	<ul ng-repeat="activity in pagedActivities" class="list-group">
       		<li class="list-group-item">
       			<span class="badge">{{activity.distance / 1000 | number:2}} km</span>

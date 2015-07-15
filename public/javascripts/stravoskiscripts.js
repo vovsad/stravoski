@@ -1,12 +1,126 @@
-/**
- * 
- */
-
 var app = angular.module('StravoSki', ['ui.bootstrap']);
+
+
 
 app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	
-	$scope.isLoaded = false;
+	
+	$scope.isLoadingActivities = true;
+	$scope.isUpdatingSkiTracks = false;
+	
+	$scope.isDataSynced = function () {
+		$http.get('/isdatasynced').
+	    success(function(data, status, headers, config) {
+	    	if(data.isDataSynced){
+	    		$scope.loadActivities();
+		        $scope.loadAthleteStatistics();
+	    	}else{
+	    		$scope.doDataSync();
+	    	}
+	    }).
+	    error(function(data, status, headers, config) {
+	    	$scope.message = "Something goes wrong";
+	    });
+		
+	};
+	
+	$scope.doDataSync = function () {
+		$http.get('/dosync').
+	    success(function(data, status, headers, config) {
+	    	$scope.loadActivities();
+	        $scope.loadAthleteStatistics();
+	        $scope.updateToSki();
+	    }).
+	    error(function(data, status, headers, config) {
+	    	$scope.message = "Something goes wrong";
+	    });
+		
+	};
+	
+	$scope.isDataSynced();
+	
+
+	$scope.currentPage = 0;
+	$scope.activitiesPerPage = 10;
+
+	$scope.loadActivities = function () {
+		$http.get('/getactivities').
+	    success(function(data, status, headers, config) {
+	      $scope.activities = data;
+	      $scope.total = data.length;
+	      $scope.pagedActivities = $scope.activities.slice(
+	    		  $scope.currentPage*$scope.activitiesPerPage, 
+	    		  $scope.currentPage*$scope.activitiesPerPage + $scope.activitiesPerPage);
+	      $scope.isLoadingActivities = false;
+	    }).
+	    error(function(data, status, headers, config) {
+	    	$scope.message = "Something goes wrong";
+	    });
+		
+	};
+	
+	$scope.updateToSki = function () {
+		$scope.isUpdatingSkiTracks = true;
+		$http.get('/updatetoski').
+	    success(function(data, status, headers, config) {
+	      if(data.isAnythingUpdated) $scope.loadActivities();
+	      $scope.isUpdatingSkiTracks = false;
+	    }).
+	    error(function(data, status, headers, config) {
+	    	$scope.message = "Something goes wrong";
+	    });
+		
+	};
+	
+	
+	$scope.loadAthleteStatistics = function () {
+		  $http.get('/getathletestat').
+		    success(function(data, status, headers, config) {
+		      $scope.statistics = data;
+		    }).
+		    error(function(data, status, headers, config) {
+		    	$scope.message = "Something goes wrong";
+		    });
+	};
+	
+	$scope.loadMoreActivities = function() {
+		$scope.currentPage++;
+	    var newActivities = $scope.activities.slice(
+	    		$scope.currentPage*$scope.activitiesPerPage, 
+	    		$scope.currentPage*$scope.activitiesPerPage + $scope.activitiesPerPage);
+	    $scope.pagedActivities = $scope.pagedActivities.concat(newActivities);
+	};
+
+	$scope.nextPageDisabledClass = function() {
+		return $scope.currentPage === $scope.pageCount()-1 || typeof $scope.total === "undefined"  || $scope.total === 0 ? "hidden" : "";
+	};
+
+	$scope.pageCount = function() {
+		return Math.ceil($scope.total/$scope.activitiesPerPage);
+	};		
+
+	$scope.doSyncWithStrava = function () {
+      	$http.get('/syncwithstrava').
+	    success(function(data, status, headers, config) {
+	    	$scope.modalDialog('Notification', 
+	    			'Your Activities are just synced and cached');
+
+	    	$scope.loadActivities();
+	    	$scope.loadAthleteStatistics();
+
+	    }).
+	    error(function(data, status, headers, config) {
+	    	$scope.modalDialog('Error', 
+			'Something goes wrong');
+	    });
+	};
+
+	$scope.doLogout = function () {
+		$location.path('/logout');
+	   	$scope.isLoaded = false;
+	};
+	
+	
 	$scope.modalDialog = function(title, body, image) {
 		var modalInstance = $modal.open({
 		      animation: $scope.animationsEnabled,
@@ -60,75 +174,6 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 		  
 		$scope.modalDialog(a.name, details, mapURL);
 	  };
-
-	
-	$scope.loadAthleteStatistics = function () {
-		  $http.get('/getathletestat').
-		    success(function(data, status, headers, config) {
-		      $scope.statistics = data;
-		    }).
-		    error(function(data, status, headers, config) {
-		    	$scope.message = "Something goes wrong";
-		    });
-	};
-	$scope.loadAthleteStatistics();
-
-	$scope.currentPage = 0;
-	$scope.activitiesPerPage = 10;
-
-	$scope.loadActivities = function () {
-		$http.get('/getactivities').
-	    success(function(data, status, headers, config) {
-	      $scope.activities = data;
-	      $scope.total = data.length;
-	      $scope.pagedActivities = $scope.activities.slice(
-	    		  $scope.currentPage*$scope.activitiesPerPage, 
-	    		  $scope.currentPage*$scope.activitiesPerPage + $scope.activitiesPerPage);
-	      $scope.isLoaded = true;
-	    }).
-	    error(function(data, status, headers, config) {
-	    	$scope.message = "Something goes wrong";
-	    });
-	};
-	$scope.loadActivities();
-	
-	
-	$scope.loadMoreActivities = function() {
-		$scope.currentPage++;
-	    var newActivities = $scope.activities.slice(
-	    		$scope.currentPage*$scope.activitiesPerPage, 
-	    		$scope.currentPage*$scope.activitiesPerPage + $scope.activitiesPerPage);
-	    $scope.pagedActivities = $scope.pagedActivities.concat(newActivities);
-	};
-
-	$scope.nextPageDisabledClass = function() {
-		return $scope.currentPage === $scope.pageCount()-1 || typeof $scope.total === "undefined"  || $scope.total === 0 ? "hidden" : "";
-	};
-
-	$scope.pageCount = function() {
-		return Math.ceil($scope.total/$scope.activitiesPerPage);
-	};		
-
-	$scope.doSyncWithStrava = function () {
-      	$http.get('/syncwithstrava').
-	    success(function(data, status, headers, config) {
-	    	$scope.modalDialog('Notification', 
-	    			'Your Activities are just synced and cached');
-
-	    	$scope.loadActivities();
-	    	$scope.loadAthleteStatistics();
-
-	    }).
-	    error(function(data, status, headers, config) {
-	    	$scope.modalDialog('Error', 
-			'Something goes wrong');
-	    });
-	};
-
-	$scope.doLogout = function () {
-		$location.path('/logout');
-	   	$scope.isLoaded = false;
-	};
 
 });
 

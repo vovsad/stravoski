@@ -3,6 +3,7 @@ package controllers;
 import java.util.List;
 
 import models.ActivityModel;
+import models.AthleteModel;
 
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.SqlQuery;
@@ -40,6 +41,12 @@ public class DBController extends Controller {
 				where("type ='AlpineSki' and athlete_id =:athlete_id").setParameter("athlete_id", id).
 				orderBy("id desc").
 				findList();
+	}
+
+	public static AthleteModel getAthlete(int id) {
+		return Ebean.find(AthleteModel.class).
+				where("id =:athlete_id").setParameter("athlete_id", id).findUnique();
+		
 	}
 	
 }
