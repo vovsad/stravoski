@@ -9,5 +9,8 @@ App v0.1 is under development now, no live instance so far.
 
 ## Plans
 1. Add user-specific season start date.
+1. Compare your ski activities with with friends.
+1. Show altitude profile on activities details.
+1. Show activities photos on details screen.
 1. Do Alpine Ski normalization based on maps or segments marked as lifts.
 1. Import from other trackers like Endomondo.
