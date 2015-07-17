@@ -130,9 +130,9 @@ public class Application extends Controller {
 	
 	public Result isDataSynced(){
 		if(session("Access_token") == null 
-				|| session("Access_token").isEmpty()) return unauthorized("{\"unauthorized\": true}");
+				|| session("Access_token").isEmpty()) return unauthorized(Json.parse("{\"unauthorized\": true}"));
 
-		return ok("{\"isDataSynced\": " + isLastActivitiesLoaded() + "}");
+		return ok(Json.parse("{\"isDataSynced\": " + isLastActivitiesLoaded() + "}"));
 	}
 	
 	private Boolean isLastActivitiesLoaded() {
@@ -164,7 +164,7 @@ public class Application extends Controller {
 			}
 		}
 		
-		return ok("{\"isAnythingUpdated\":" + isAnythingUpdated + "}");
+		return ok(Json.parse("{\"isAnythingUpdated\":" + isAnythingUpdated + "}"));
 		
 		}
 			
@@ -211,12 +211,13 @@ public class Application extends Controller {
 
 	public Result getActivities() {
 		if(session("Access_token") == null 
-				|| session("Access_token").isEmpty()) return unauthorized("{\"unauthorized\": true}");
+				|| session("Access_token").isEmpty()) return unauthorized(Json.parse("{\"unauthorized\": true}"));
 		
 		if(isLastActivitiesLoaded()){
 			return ok(Json.toJson(DBController.getSkiActivities(session("Athlete_id"))));
 		}else{
-			return ok("{\"NoActivities\": true}");
+			syncStravaToDB();
+			return ok(Json.parse("{\"NoActivities\": true}"));
 		}
 	}
 	
@@ -228,6 +229,10 @@ public class Application extends Controller {
 	
 	//TODO: refactor me please
 	public Result getAthleteStatistics() {
+		if(session("Access_token") == null 
+				|| session("Access_token").isEmpty()) return unauthorized(Json.parse("{\"unauthorized\": true}"));
+
+		
 		List<ActivityModel> activities = DBController.getSkiActivities(session("Athlete_id"));
 		ObjectNode statistics = Json.newObject();
 		

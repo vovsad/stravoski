@@ -11,7 +11,8 @@ libraryDependencies ++= Seq(
   cache,
   javaWs,
   "com.google.code.gson" % "gson" % "2.3.1",
-  "mysql" % "mysql-connector-java" % "5.1.35"
+  "mysql" % "mysql-connector-java" % "5.1.35",
+  "org.mockito" % "mockito-core" % "2.0.28-beta"
 )
 
 // Play provides two styles of routers, one expects its actions to be injected, the
