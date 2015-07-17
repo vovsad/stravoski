@@ -7,6 +7,7 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	
 	$scope.isLoadingActivities = true;
 	$scope.isUpdatingSkiTracks = false;
+	$scope.showTopMenu = false;
 	
 	$scope.isDataSynced = function () {
 		$http.get('/isdatasynced').
@@ -52,6 +53,7 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	    		  $scope.currentPage*$scope.activitiesPerPage, 
 	    		  $scope.currentPage*$scope.activitiesPerPage + $scope.activitiesPerPage);
 	      $scope.isLoadingActivities = false;
+	      $scope.showTopMenu = true;
 	    }).
 	    error(function(data, status, headers, config) {
 	    	$scope.message = "Something goes wrong";
