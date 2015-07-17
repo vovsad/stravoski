@@ -55,8 +55,8 @@ public class ApplicationTest extends WithApplication {
     	RequestBuilder request = new RequestBuilder()
         .method(GET)
         .uri("/getactivities")
-        .session("Access_token", "722eb0a14c2e43220de11fa1d31e07bd52730294")
-        .session("Athlete_id", "418242");
+        .session("Access_token", "e20942cef5847011398f80e964cdff4c825675a1")
+        .session("Athlete_id", "9580110");
 
     	Result result = route(request);
         assertEquals(OK, result.status());
@@ -70,8 +70,8 @@ public class ApplicationTest extends WithApplication {
     	RequestBuilder request = new RequestBuilder()
         .method(GET)
         .uri("/getathletestat")
-        .session("Access_token", "722eb0a14c2e43220de11fa1d31e07bd52730294")
-        .session("Athlete_id", "418242");
+        .session("Access_token", "e20942cef5847011398f80e964cdff4c825675a1")
+        .session("Athlete_id", "9580110");
 
     	Result result = route(request);
     	

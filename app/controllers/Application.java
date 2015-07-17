@@ -34,6 +34,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class Application extends Controller {
 	
 	public Result index() {
+		Logger.debug(session("Access_token"));		
+		Logger.debug(session("Athlete_id"));
+
+		
 		return ok(views.html.index.render(session("Access_token") != null
 				&& !session("Access_token").isEmpty()));
 	}
