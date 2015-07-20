@@ -26,7 +26,6 @@ import play.Logger;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
-import play.mvc.WebSocket;
 
 import com.avaje.ebean.Ebean;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -34,10 +33,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class Application extends Controller {
 	
 	public Result index() {
-		Logger.debug(session("Access_token"));		
-		Logger.debug(session("Athlete_id"));
-
-		
 		return ok(views.html.index.render(session("Access_token") != null
 				&& !session("Access_token").isEmpty()));
 	}

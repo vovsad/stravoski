@@ -2,18 +2,22 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static play.mvc.Http.Status.OK;
 import static play.test.Helpers.*;
-import controllers.Application;
 
 import java.util.Collections;
 import java.util.Map;
 
+import models.ActivityModel;
+
 import org.junit.Before;
 import org.junit.Test;
 
+import com.avaje.ebean.Ebean;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import controllers.Application;
 import play.Logger;
-import play.core.j.JavaResultExtractor;
+import play.libs.Json;
 import play.mvc.Http;
-import play.mvc.Http.RequestBody;
 import play.mvc.Result;
 import play.test.FakeApplication;
 import play.test.WithApplication;
@@ -52,6 +56,7 @@ public class ApplicationTest extends WithApplication {
     
     @Test
     public void getActivitiesJSON() {
+    	Logger.debug("getActivitiesJSON()");
     	RequestBuilder request = new RequestBuilder()
         .method(GET)
         .uri("/getactivities")
@@ -61,12 +66,14 @@ public class ApplicationTest extends WithApplication {
     	Result result = route(request);
         assertEquals(OK, result.status());
         assertEquals("application/json", result.contentType());
-//      byte[] body = JavaResultExtractor.getBody(result, 0l);
-//      Logger.debug(new String(body));
+        JsonNode resultAsJson = Json.parse(contentAsString(result));
+        assertEquals(17, resultAsJson.size());
+
     }
     
     @Test
     public void getAthleteStatisticsJSON() {
+    	Logger.debug("getAthleteStatisticsJSON()");
     	RequestBuilder request = new RequestBuilder()
         .method(GET)
         .uri("/getathletestat")
@@ -75,9 +82,66 @@ public class ApplicationTest extends WithApplication {
 
     	Result result = route(request);
     	
-    	Logger.debug(contentAsString(result));
         assertEquals(OK, result.status());
         assertEquals("application/json", result.contentType());
+
+        JsonNode resultAsJson = Json.parse(contentAsString(result));
+    	assertEquals(588.95074,
+    			resultAsJson.get("totalDistance").asDouble(), 
+    			0.001);
+
+    }
+
+    @Test
+    public void isDataSyncedJSON() {
+    	Logger.debug("isDataSyncedJSON()");
+    	RequestBuilder request = new RequestBuilder()
+        .method(GET)
+        .uri("/isdatasynced")
+        .session("Access_token", "e20942cef5847011398f80e964cdff4c825675a1")
+        .session("Athlete_id", "9580110");
+
+    	Result result = route(request);
+    	
+        assertEquals(OK, result.status());
+        assertEquals("application/json", result.contentType());
+
+        JsonNode resultAsJson = Json.parse(contentAsString(result));
+    	assertEquals(true, resultAsJson.get("isDataSynced").asBoolean());
+
+    }
+
+    @Test
+    public void isDataSyncedJSONNegative() {
+    	Logger.debug("isDataSyncedJSONNegative()");
+    	ActivityModel lastActivity = Ebean.find(ActivityModel.class).
+		where("id = 348038961").
+		findUnique();
+    	if(lastActivity != null)
+    		lastActivity.delete();
+    	
+    	
+    	RequestBuilder request = new RequestBuilder()
+        .method(GET)
+        .uri("/isdatasynced")
+        .session("Access_token", "e20942cef5847011398f80e964cdff4c825675a1")
+        .session("Athlete_id", "9580110");
+
+    	Result result = route(request);
+    	
+        assertEquals(OK, result.status());
+        assertEquals("application/json", result.contentType());
+
+        JsonNode resultAsJson = Json.parse(contentAsString(result));
+    	assertEquals(false, resultAsJson.get("isDataSynced").asBoolean());
+    	
+    	request = new RequestBuilder()
+        .method(GET)
+        .uri("/dosync")
+        .session("Access_token", "e20942cef5847011398f80e964cdff4c825675a1")
+        .session("Athlete_id", "9580110");
+    	result = route(request);
+
     }
 
 
