@@ -232,11 +232,12 @@ public class Application extends Controller {
 				|| session("Access_token").isEmpty()) return unauthorized(Json.parse("{\"unauthorized\": true}"));
 
 		
+		syncStravaToDB();
 		List<ActivityModel> activities = DBController.getSkiActivities(session("Athlete_id"));
 		ObjectNode statistics = Json.newObject();
 		
 		if(activities.isEmpty()){
-			statistics.put("isempty", true);
+			statistics.put("isEmpty", true);
 			return ok(statistics);
 		}
 		
