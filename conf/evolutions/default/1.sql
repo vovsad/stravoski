@@ -68,7 +68,6 @@ create table athlete_model (
   date_preference           varchar(255),
   measurement_preference    varchar(255),
   email                     varchar(255),
-  email2                     varchar(255),
   constraint pk_athlete_model primary key (id))
  engine=InnoDB default charset=utf8;
 
