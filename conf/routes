@@ -15,6 +15,7 @@ GET     /getactivities						controllers.Application.getActivities()
 GET     /dosync								controllers.Application.getActivitiesSynced()
 GET		/getathletestat						controllers.Application.getAthleteStatistics()
 GET		/isdatasynced						controllers.Application.isDataSynced()
+GET		/getfriends							controllers.Application.getFriends()
 
 #Backgroud actions
 GET     /syncwithstrava						controllers.Application.getActivitiesSynced()

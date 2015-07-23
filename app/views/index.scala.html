@@ -107,12 +107,18 @@
 
 	<div class="panel panel-default">
 		  <div class="panel-heading">Skiing profile</div>
-		  <div class="panel-body" ng-hide="statistics.isempty">
+		  <div class="panel-body" ng-hide="statistics.isempty || $scope.isLoadingActivities">
 		    <p>Your profile stores {{statistics.skiedYearsHistory}} years of skiing.<br/>
 		    Skied <strong>{{statistics.skiedDaysThisSeason}} days</strong> with <strong>{{statistics.skiedKmThisSeason / 1000 | number:0}} km</strong> in <strong>current season</strong>
 		    <a href="#" data-toggle="tooltip" title="Season in our current version means year. However later we plan to add ability to customize meaning of seasons.">*</a>,<br/>
 		    {{statistics.skiedDaysLastSeason}} days with {{statistics.skiedKmLastSeason / 1000 | number:0}} km in previous season and <strong>{{statistics.totalDistance | number:0}} km from beginning</strong>.</p>
 		    <p>Longest skiing day at <a ng-click="modalDialogActivityDetails(statistics.longestDayActivity)">{{statistics.longestDayDate | date}}</a> with {{statistics.longestDay | number:0}} km</p>
+		  </div>
+	</div>
+	
+	<div class="panel panel-default">
+		  <div class="panel-heading">Compare to Friends</div>
+		  <div class="panel-body" ng-hide="friends.isempty">
 		  </div>
 	</div> 	
  	}

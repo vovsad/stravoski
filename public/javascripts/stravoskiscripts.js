@@ -85,6 +85,18 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 		    });
 	};
 	
+	$scope.loadFriends = function () {
+		$http.get('/getfriends').
+	    success(function(data, status, headers, config) {
+	      $scope.friends = data;
+	    }).
+	    error(function(data, status, headers, config) {
+	    	$scope.message = "Something goes wrong";
+	    });
+		
+	};	
+	$scope.loadFriends();
+	
 	$scope.loadMoreActivities = function() {
 		$scope.currentPage++;
 	    var newActivities = $scope.activities.slice(
