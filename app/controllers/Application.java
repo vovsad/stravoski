@@ -302,4 +302,10 @@ public class Application extends Controller {
 		return ok(statistics);
 	}
 	
+	public Result getFriends(){
+		ObjectNode friends = Json.newObject();
+		friends.put("isempty", true);
+		return ok(friends);
+	}
+	
 }
