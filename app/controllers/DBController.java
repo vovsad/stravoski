@@ -43,7 +43,7 @@ public class DBController extends Controller {
 				findList();
 	}
 
-	public static AthleteModel getAthlete(int id) {
+	public static AthleteModel getAthlete(String id) {
 		return Ebean.find(AthleteModel.class).
 				where("id =:athlete_id").setParameter("athlete_id", id).findUnique();
 		

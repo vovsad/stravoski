@@ -234,6 +234,7 @@ public class Application extends Controller {
 		
 		syncStravaToDB();
 		List<ActivityModel> activities = DBController.getSkiActivities(session("Athlete_id"));
+		AthleteModel athlete = DBController.getAthlete(session("Athlete_id"));
 		ObjectNode statistics = Json.newObject();
 		
 		if(activities.isEmpty()){
@@ -290,7 +291,13 @@ public class Application extends Controller {
 		statistics.put("skiedDaysThisSeason", daysThisSeason);
 		statistics.put("skiedDaysLastSeason", daysLastSeason);
 		statistics.put("skiedKmThisSeason", kmThisSeason);
-		statistics.put("skiedKmLastSeason", kmLastSeason);		
+		statistics.put("skiedKmLastSeason", kmLastSeason);
+		if(athlete.profile_medium.startsWith("http")){
+			statistics.put("profile_medium", athlete.profile_medium);
+		}else{
+			statistics.put("profile_medium", "/assets/images/avatar.png");
+		}
+		
 		
 		return ok(statistics);
 	}
