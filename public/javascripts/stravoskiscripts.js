@@ -7,6 +7,7 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	
 	$scope.isLoadingActivities = true;
 	$scope.isUpdatingSkiTracks = false;
+	$scope.isLoadingFriends = true;
 	$scope.showTopMenu = false;
 	
 	$scope.isDataSynced = function () {
@@ -89,6 +90,7 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 		$http.get('/getfriends').
 	    success(function(data, status, headers, config) {
 	      $scope.friends = data;
+	      $scope.isLoadingFriends = false;
 	    }).
 	    error(function(data, status, headers, config) {
 	    	$scope.message = "Something goes wrong";

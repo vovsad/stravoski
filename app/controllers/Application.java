@@ -9,10 +9,12 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import models.ActivityModel;
 import models.AthleteModel;
 //import controllers.DBController;
+
 
 
 import org.jstrava.authenticator.AuthResponse;
@@ -303,9 +305,25 @@ public class Application extends Controller {
 	}
 	
 	public Result getFriends(){
-		ObjectNode friends = Json.newObject();
-		friends.put("isempty", true);
-		return ok(friends);
+		if(session("Access_token") == null 
+				|| session("Access_token").isEmpty()) return unauthorized(Json.parse("{\"unauthorized\": true}"));
+		
+		final JStravaV3 strava = new JStravaV3(session("Access_token"));
+		
+		List<Athlete> friends = strava.getCurrentAthleteFriends();
+		
+		
+		return ok(Json.toJson(friends.stream().filter(a -> usesStravoski(a)).collect(Collectors.toList())));
 	}
+	
+	private Boolean usesStravoski(Athlete a){
+		Logger.debug(a.getLastname());
+		if(DBController.getAthlete(Long.toString(a.getId())) == null){
+			return false;
+			}else{
+				Logger.debug(a.getLastname());
+				return true;
+				}
+		}
 	
 }

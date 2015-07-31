@@ -118,7 +118,16 @@
 	
 	<div class="panel panel-default">
 		  <div class="panel-heading">Compare to Friends</div>
-		  <div class="panel-body" ng-hide="friends.isempty">
+		  <div class="panel-body">
+		  	<div ng-show="isLoadingFriends" class="alert alert-dismissible alert-info">
+	  			<strong>Friends Will Be Friends!</strong> Are your friends skiing as well? Their activities should be here shortly.
+			</div>
+			<ul ng-repeat="friend in friends | limitTo:6" class="list-group">
+      			<li class="list-group-item">{{friend.firstname}} {{friend.lastname}}</li>
+      		</ul>
+	    	<center>
+		    	<button class="btn" href="#" >View More</button>
+	    	</center>
 		  </div>
 	</div> 	
  	}
