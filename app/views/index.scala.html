@@ -107,7 +107,7 @@
 
 	<div class="panel panel-default">
 		  <div class="panel-heading">Skiing profile</div>
-		  <div class="panel-body" ng-hide="statistics.isempty || $scope.isLoadingActivities">
+		  <div class="panel-body" ng-hide="statistics.isempty || isLoadingActivities">
 		    <p>Your profile stores {{statistics.skiedYearsHistory}} years of skiing.<br/>
 		    Skied <strong>{{statistics.skiedDaysThisSeason}} days</strong> with <strong>{{statistics.skiedKmThisSeason / 1000 | number:0}} km</strong> in <strong>current season</strong>
 		    <a href="#" data-toggle="tooltip" title="Season in our current version means year. However later we plan to add ability to customize meaning of seasons.">*</a>,<br/>
