@@ -17,6 +17,7 @@ import models.AthleteModel;
 
 
 
+
 import org.jstrava.authenticator.AuthResponse;
 import org.jstrava.authenticator.StravaAuthenticator;
 import org.jstrava.connector.JStravaV3;
@@ -227,81 +228,33 @@ public class Application extends Controller {
 		return ok();
 	}
 	
-	
-	//TODO: refactor me please
 	public Result getAthleteStatistics() {
 		if(session("Access_token") == null 
 				|| session("Access_token").isEmpty()) return unauthorized(Json.parse("{\"unauthorized\": true}"));
-
 		
 		syncStravaToDB();
+		
 		List<ActivityModel> activities = DBController.getSkiActivities(session("Athlete_id"));
-		AthleteModel athlete = DBController.getAthlete(session("Athlete_id"));
-		ObjectNode statistics = Json.newObject();
 		
 		if(activities.isEmpty()){
-			statistics.put("isEmpty", true);
-			return ok(statistics);
-		}
-		
-		float totalDistance = 0;
-		float longestDay = 0;
-		ActivityModel longestDayActivity = new ActivityModel();
-		String longestDayDate = "";
-		Set<String> years = new LinkedHashSet<String>();
-		int daysThisSeason = 0;
-		int daysLastSeason = 0;
-		int kmThisSeason = 0;
-		int kmLastSeason = 0;
-
-		ZonedDateTime notTheSameDay = ZonedDateTime.now().plusDays(1);
-
-		
-		for (ActivityModel a : activities){
-			totalDistance += a.distance;
-			
-			if(longestDay < a.distance){
-				longestDay = a.distance;
-				longestDayDate = a.start_date;
-				longestDayActivity = a;
-			}
-			
-			years.add(Integer.toString(
-					ZonedDateTime.parse(a.start_date,
-						DateTimeFormatter.ISO_DATE_TIME).getYear()));
-			
-			if(a.start_date_asdate.getYear() == ZonedDateTime.now().getYear() &&
-					a.start_date_asdate.getDayOfMonth() != notTheSameDay.getDayOfMonth()){
-				daysThisSeason++;
-				kmThisSeason += a.distance;
-			}
-
-			if(a.start_date_asdate.getYear() == ZonedDateTime.now().getYear() - 1 &&
-					a.start_date_asdate.getDayOfMonth() != notTheSameDay.getDayOfMonth()){
-				daysLastSeason++;
-				kmLastSeason += a.distance;
-			}
-			
-			notTheSameDay = a.start_date_asdate;
-			
-		}
-		statistics.put("totalDistance", totalDistance/1000);
-		statistics.put("longestDay", longestDay/1000);
-		statistics.putPOJO("longestDayActivity", Json.toJson(longestDayActivity));
-		statistics.put("longestDayDate", longestDayDate);
-		statistics.put("skiedYearsHistory", years.size());
-		statistics.put("skiedDaysThisSeason", daysThisSeason);
-		statistics.put("skiedDaysLastSeason", daysLastSeason);
-		statistics.put("skiedKmThisSeason", kmThisSeason);
-		statistics.put("skiedKmLastSeason", kmLastSeason);
-		if(athlete.profile_medium.startsWith("http")){
-			statistics.put("profile_medium", athlete.profile_medium);
+			return ok(Json.parse("{\"isEmpty\": true}"));
 		}else{
-			statistics.put("profile_medium", "/assets/images/avatar.png");
+			AthleteStatistics statistics = new AthleteStatistics();
+			
+			for (ActivityModel a : activities){
+				statistics.addToTotalDistance(a.distance);
+				statistics.collectLongestDay(a);
+				statistics.collectYearsData(a);
+				statistics.collectSeasonData(a);
+			}
+	
+			if(DBController.getAthlete(session("Athlete_id")).profile_medium.startsWith("http")){
+				statistics.setProfileAvatar(DBController.getAthlete(session("Athlete_id")).profile_medium);
+				
+			}
+			
+			return ok(statistics.asJson());
 		}
-		
-		
-		return ok(statistics);
 	}
 	
 	public Result getFriends(){
@@ -317,13 +270,78 @@ public class Application extends Controller {
 	}
 	
 	private Boolean usesStravoski(Athlete a){
-		Logger.debug(a.getLastname());
 		if(DBController.getAthlete(Long.toString(a.getId())) == null){
 			return false;
 			}else{
-				Logger.debug(a.getLastname());
 				return true;
 				}
 		}
+	
+	class AthleteStatistics{
+		float totalDistance = 0;
+		ActivityModel longestDayActivity = new ActivityModel();
+		Set<String> years = new LinkedHashSet<String>();
+		int daysThisSeason = 0;
+		int daysLastSeason = 0;
+		int kmThisSeason = 0;
+		int kmLastSeason = 0;
+		String profile_medium = "/assets/images/avatar.png";
+		
+		ZonedDateTime previousActivityDate = ZonedDateTime.now().plusDays(1);
+		
+		ObjectNode asJson(){
+			ObjectNode json = Json.newObject();
+			json.put("totalDistance", totalDistance);
+			json.putPOJO("longestDayActivity", Json.toJson(longestDayActivity));
+			json.put("skiedYearsHistory", years.size());
+			json.put("skiedDaysThisSeason", daysThisSeason);
+			json.put("skiedDaysLastSeason", daysLastSeason);
+			json.put("skiedKmThisSeason", kmThisSeason);
+			json.put("skiedKmLastSeason", kmLastSeason);
+			json.put("profile_medium", profile_medium);
+			
+			return json;
+			
+		}
+
+		public void setProfileAvatar(String profile_medium2) {
+			profile_medium = profile_medium2;
+			
+		}
+
+		public void collectLongestDay(ActivityModel a) {
+			if(longestDayActivity.distance < a.distance){
+				longestDayActivity = a;
+			}
+		}
+
+		public void addToTotalDistance(float distance) {
+			totalDistance += distance;
+			
+		}
+
+		public void collectYearsData(ActivityModel a) {
+			years.add(Integer.toString(
+			ZonedDateTime.parse(a.start_date,
+					DateTimeFormatter.ISO_DATE_TIME).getYear()));
+			
+		}
+
+		public void collectSeasonData(ActivityModel a) {
+			if(a.start_date_asdate.getDayOfMonth() != previousActivityDate.getDayOfMonth()){
+				if(a.start_date_asdate.getYear() == ZonedDateTime.now().getYear()){
+					daysThisSeason++;
+					//TODO:kmThisSeason should be out of outer if, isn't it? 
+					kmThisSeason += a.distance;
+				}
+	
+				if(a.start_date_asdate.getYear() == ZonedDateTime.now().getYear() - 1){
+					daysLastSeason++;
+					kmLastSeason += a.distance;
+				}
+			}
+			previousActivityDate = a.start_date_asdate;
+		}
+	}
 	
 }
