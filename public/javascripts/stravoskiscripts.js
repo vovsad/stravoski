@@ -187,7 +187,8 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 				+ ':' + minutes(a.elapsed_time) + ' elapsed time. ';
 		
 		details += 'Downhill distance without ski lifts is ' + Math.round(a.downhill_distance/1000) + 'km .';
-		  
+		
+		$scope.modalTemplete = 'modalContent.html';
 		$scope.modalDialog(a.name, details, mapURL);
 	  };
 	  
