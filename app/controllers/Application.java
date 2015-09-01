@@ -18,6 +18,7 @@ import models.AthleteModel;
 
 
 
+
 import org.jstrava.authenticator.AuthResponse;
 import org.jstrava.authenticator.StravaAuthenticator;
 import org.jstrava.connector.JStravaV3;
@@ -138,7 +139,7 @@ public class Application extends Controller {
 	}
 	
 	private Boolean isLastActivitiesLoaded() {
-		
+	
 		if(DBController.cachedActivitiesCount(session("Athlete_id")) == 0) return false;
 		
 		final JStravaV3 strava = new JStravaV3(session("Access_token"));
@@ -232,14 +233,16 @@ public class Application extends Controller {
 		if(session("Access_token") == null 
 				|| session("Access_token").isEmpty()) return unauthorized(Json.parse("{\"unauthorized\": true}"));
 		
-		syncStravaToDB();
+		return getAthleteStatisticsById(session("Athlete_id"));
 		
-		List<ActivityModel> activities = DBController.getSkiActivities(session("Athlete_id"));
+	}
+	public Result getAthleteStatisticsById(String Athlete_id) {
+		List<ActivityModel> activities = DBController.getSkiActivities(Athlete_id);
 		
 		if(activities.isEmpty()){
 			return ok(Json.parse("{\"isEmpty\": true}"));
 		}else{
-			AthleteStatistics statistics = new AthleteStatistics();
+			AthleteStatistics statistics = new AthleteStatistics(DBController.getAthlete(Athlete_id).firstname);
 			
 			for (ActivityModel a : activities){
 				statistics.addToTotalDistance(a.distance);
@@ -248,8 +251,8 @@ public class Application extends Controller {
 				statistics.collectSeasonData(a);
 			}
 	
-			if(DBController.getAthlete(session("Athlete_id")).profile_medium.startsWith("http")){
-				statistics.setProfileAvatar(DBController.getAthlete(session("Athlete_id")).profile_medium);
+			if(DBController.getAthlete(Athlete_id).profile_medium.startsWith("http")){
+				statistics.setProfileAvatar(DBController.getAthlete(Athlete_id).profile_medium);
 				
 			}
 			
@@ -278,6 +281,7 @@ public class Application extends Controller {
 		}
 	
 	class AthleteStatistics{
+		String firstName = "";
 		float totalDistance = 0;
 		ActivityModel longestDayActivity = new ActivityModel();
 		Set<String> years = new LinkedHashSet<String>();
@@ -289,8 +293,13 @@ public class Application extends Controller {
 		
 		ZonedDateTime previousActivityDate = ZonedDateTime.now().plusDays(1);
 		
+		public AthleteStatistics(String name) {
+			firstName = name;
+		}
+
 		ObjectNode asJson(){
 			ObjectNode json = Json.newObject();
+			json.put("firstName", firstName);
 			json.put("totalDistance", totalDistance);
 			json.putPOJO("longestDayActivity", Json.toJson(longestDayActivity));
 			json.put("skiedYearsHistory", years.size());

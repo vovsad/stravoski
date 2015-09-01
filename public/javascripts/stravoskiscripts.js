@@ -136,11 +136,11 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	   	$scope.isLoaded = false;
 	};
 	
-	
+	$scope.modalTemplete = 'modalContent.html';
 	$scope.modalDialog = function(title, body, image) {
 		var modalInstance = $modal.open({
 		      animation: $scope.animationsEnabled,
-		      templateUrl: 'modalContent.html',
+		      templateUrl: $scope.modalTemplete,
 	      controller: 'ModalInstanceCtrl',
 	      resolve: {
 	        messageBody: function () {
@@ -190,6 +190,28 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 		  
 		$scope.modalDialog(a.name, details, mapURL);
 	  };
+	  
+	$scope.modalDialogFriendCompare = function (f){
+		  $http.get('/getathletestat/' + f).
+		    success(function(data, status, headers, config) {
+		    	$scope.modalTemplete = 'modalDialogFriendCompareContent.html';
+		    		      
+		    	var comparedData = new Object();
+		    	comparedData.friendsName = data.firstName;
+		    	comparedData.yoursTotalDistance = $scope.statistics.totalDistance;
+		    	comparedData.friendsTotalDistance = data.totalDistance;
+		    	comparedData.yoursLongestDayActivityDistance = $scope.statistics.longestDayActivity.distance;
+		    	comparedData.friendsLongestDayActivityDistance = data.longestDayActivity.distance;
+		    	comparedData.yoursSkiedKmThisSeason = $scope.statistics.skiedKmThisSeason;
+		    	comparedData.friendsSkiedKmThisSeason = data.skiedKmThisSeason;
+
+		    	$scope.modalDialog('Compete with friends!', comparedData);
+		    }).
+		    error(function(data, status, headers, config) {
+		    	$scope.message = "Something goes wrong";
+		    });
+	  };
+
 
 });
 
