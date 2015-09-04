@@ -19,6 +19,7 @@ import models.AthleteModel;
 
 
 
+
 import org.jstrava.authenticator.AuthResponse;
 import org.jstrava.authenticator.StravaAuthenticator;
 import org.jstrava.connector.JStravaV3;
@@ -27,6 +28,7 @@ import org.jstrava.entities.athlete.Athlete;
 import org.jstrava.entities.stream.Stream;
 
 import play.Logger;
+import play.Play;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -42,10 +44,9 @@ public class Application extends Controller {
 	}
 
 	public Result tokenExchange(String code) {
-		Logger.debug("in tokenExchange");
-
+		String host = Play.application().configuration().getString("stravoski.host");
 		StravaAuthenticator authenticator = new StravaAuthenticator(1455,
-				"http://localhost:9000/tokenexchange",
+				"http://" + host + "/tokenexchange",
 				"22122cf967940aa0d142f51ca987b878aba948eb");
 
 		AuthResponse authResponse = authenticator.getToken(code);
@@ -203,7 +204,8 @@ public class Application extends Controller {
 	
 
 	public Result login() {
-		return redirect("https://www.strava.com/oauth/authorize?client_id=1455&redirect_uri=http://localhost:9000/tokenexchange&response_type=code");
+		String host = Play.application().configuration().getString("stravoski.host");
+		return redirect("https://www.strava.com/oauth/authorize?client_id=1455&redirect_uri=http://" + host + "/tokenexchange&response_type=code");
 	}
 	
 	public Result logout(){
