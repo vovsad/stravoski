@@ -41,18 +41,18 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	
 	$scope.isDataSynced();
 	
+	
+	
 
-	$scope.currentPage = 0;
+	$scope.activitiesCurrentPage = 0;
 	$scope.activitiesPerPage = 10;
-
 	$scope.loadActivities = function () {
 		$http.get('/getactivities').
 	    success(function(data, status, headers, config) {
 	      $scope.activities = data;
-	      $scope.total = data.length;
 	      $scope.pagedActivities = $scope.activities.slice(
-	    		  $scope.currentPage*$scope.activitiesPerPage, 
-	    		  $scope.currentPage*$scope.activitiesPerPage + $scope.activitiesPerPage);
+	    		  $scope.activitiesCurrentPage*$scope.activitiesPerPage, 
+	    		  $scope.activitiesCurrentPage*$scope.activitiesPerPage + $scope.activitiesPerPage);
 	      $scope.isLoadingActivities = false;
 	      $scope.showTopMenu = true;
 	    }).
@@ -61,6 +61,26 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	    });
 		
 	};
+	$scope.loadMoreActivities = function() {
+		$scope.activitiesCurrentPage++;
+	    var newActivities = $scope.activities.slice(
+	    		$scope.activitiesCurrentPage*$scope.activitiesPerPage, 
+	    		$scope.activitiesCurrentPage*$scope.activitiesPerPage + $scope.activitiesPerPage);
+	    $scope.pagedActivities = $scope.pagedActivities.concat(newActivities);
+	};
+	
+	
+	$scope.nextPageDisabledClass = function(current, count, lendth) {
+		console.log("current, count, lendth");
+		console.log(current +","+ count +","+ lendth);
+		return current === count - 1 || typeof lendth === "undefined"  || lendth === 0 ? "hidden" : "";
+	};
+	$scope.pageCount = function(length, perPage) {
+		return Math.ceil(length/perPage);
+	};		
+	
+	
+
 	
 	$scope.updateToSki = function () {
 		$scope.isUpdatingSkiTracks = true;
@@ -76,6 +96,8 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	};
 	
 	
+	
+	
 	$scope.loadAthleteStatistics = function () {
 		  $http.get('/getathletestat').
 		    success(function(data, status, headers, config) {
@@ -86,35 +108,38 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 		    });
 	};
 	
+	
+	
+	
+	$scope.friendsCurrentPage = 0;
+	$scope.friendsPerPage = 5;
+
 	$scope.loadFriends = function () {
 		$http.get('/getfriends').
 	    success(function(data, status, headers, config) {
 	      $scope.friends = data;
+	      $scope.pagedFriends = $scope.friends.slice(
+	    		  $scope.friendsCurrentPage*$scope.friendsPerPage, 
+	    		  $scope.friendsCurrentPage*$scope.friendsPerPage + $scope.friendsPerPage);
+
+	      
 	      $scope.isLoadingFriends = false;
 	    }).
 	    error(function(data, status, headers, config) {
 	    	$scope.message = "Something goes wrong";
 	    });
-		
-	};	
+	};
+	$scope.loadMoreFriends = function() {
+		$scope.friendsCurrentPage++;
+	    var newFriends = $scope.friends.slice(
+	    		$scope.friendsCurrentPage*$scope.friendsPerPage, 
+	    		$scope.friendsCurrentPage*$scope.friendsPerPage + $scope.friendsPerPage);
+	    $scope.pagedFriends = $scope.pagedFriends.concat(newFriends);
+	};
+
+	
 	$scope.loadFriends();
 	
-	$scope.loadMoreActivities = function() {
-		$scope.currentPage++;
-	    var newActivities = $scope.activities.slice(
-	    		$scope.currentPage*$scope.activitiesPerPage, 
-	    		$scope.currentPage*$scope.activitiesPerPage + $scope.activitiesPerPage);
-	    $scope.pagedActivities = $scope.pagedActivities.concat(newActivities);
-	};
-
-	$scope.nextPageDisabledClass = function() {
-		return $scope.currentPage === $scope.pageCount()-1 || typeof $scope.total === "undefined"  || $scope.total === 0 ? "hidden" : "";
-	};
-
-	$scope.pageCount = function() {
-		return Math.ceil($scope.total/$scope.activitiesPerPage);
-	};		
-
 	$scope.doSyncWithStrava = function () {
       	$http.get('/syncwithstrava').
 	    success(function(data, status, headers, config) {
