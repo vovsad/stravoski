@@ -267,10 +267,7 @@ public class Application extends Controller {
 				|| session("Access_token").isEmpty()) return unauthorized(Json.parse("{\"unauthorized\": true}"));
 		
 		final JStravaV3 strava = new JStravaV3(session("Access_token"));
-		
 		List<Athlete> friends = strava.getCurrentAthleteFriends();
-		
-		
 		return ok(Json.toJson(friends.stream().filter(a -> usesStravoski(a)).collect(Collectors.toList())));
 	}
 	

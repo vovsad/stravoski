@@ -71,8 +71,6 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	
 	
 	$scope.nextPageDisabledClass = function(current, count, lendth) {
-		console.log("current, count, lendth");
-		console.log(current +","+ count +","+ lendth);
 		return current === count - 1 || typeof lendth === "undefined"  || lendth === 0 ? "hidden" : "";
 	};
 	$scope.pageCount = function(length, perPage) {
