@@ -263,6 +263,7 @@ public class Application extends Controller {
 				statistics.collectLongestDay(a);
 				statistics.collectYearsData(a);
 				statistics.collectSeasonData(a);
+				statistics.collectMaxSpeed(a);
 			}
 	
 			if(DBController.getAthlete(Athlete_id).profile_medium.startsWith("http")){
@@ -293,15 +294,20 @@ public class Application extends Controller {
 		}
 	
 	class AthleteStatistics{
-		String firstName = "";
+		String firstName;
 		float totalDistance = 0;
-		ActivityModel longestDayActivity = new ActivityModel();
+		float longestDayDistance = 0;
+		int longestDayActivityId;
+		String longestDayDate;
 		Set<String> years = new LinkedHashSet<String>();
 		int daysThisSeason = 0;
 		int daysLastSeason = 0;
 		int kmThisSeason = 0;
 		int kmLastSeason = 0;
 		String profile_medium = "/assets/images/avatar.png";
+		float maxSpeed = 0;
+		int maxSpeedActivityId;
+		String maxSpeedDate; 
 		
 		ZonedDateTime previousActivityDate = ZonedDateTime.now().plusDays(1);
 		
@@ -309,17 +315,32 @@ public class Application extends Controller {
 			firstName = name;
 		}
 
+		public void collectMaxSpeed(ActivityModel a) {
+			if(maxSpeed < a.max_speed) {
+				maxSpeed = a.max_speed;
+				maxSpeedActivityId = a.id;
+				maxSpeedDate = a.start_date;
+			}
+			
+		}
+
 		ObjectNode asJson(){
 			ObjectNode json = Json.newObject();
 			json.put("firstName", firstName);
 			json.put("totalDistance", totalDistance);
-			json.putPOJO("longestDayActivity", Json.toJson(longestDayActivity));
+			json.put("longestDayActivity", longestDayActivityId);
+			json.put("longestDayDistance", longestDayDistance);
+			json.put("longestDayDate", longestDayDate);
 			json.put("skiedYearsHistory", years.size());
 			json.put("skiedDaysThisSeason", daysThisSeason);
 			json.put("skiedDaysLastSeason", daysLastSeason);
 			json.put("skiedKmThisSeason", kmThisSeason);
 			json.put("skiedKmLastSeason", kmLastSeason);
 			json.put("profile_medium", profile_medium);
+			json.put("maxSpeed", maxSpeed);
+			json.put("maxSpeedActivity", maxSpeedActivityId);
+			json.put("maxSpeedDate", maxSpeedDate);
+			
 			
 			return json;
 			
@@ -331,8 +352,10 @@ public class Application extends Controller {
 		}
 
 		public void collectLongestDay(ActivityModel a) {
-			if(longestDayActivity.distance < a.distance){
-				longestDayActivity = a;
+			if(longestDayDistance < a.distance){
+				longestDayDistance = a.distance;
+				longestDayActivityId = a.id;
+				longestDayDate = a.start_date;
 			}
 		}
 

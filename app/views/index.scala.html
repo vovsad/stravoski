@@ -161,7 +161,7 @@
 	   	<ul ng-repeat="activity in pagedActivities" class="list-group">
       		<li class="list-group-item">
       			<span class="badge">{{activity.distance / 1000 | number:2}} km</span>
-      			{{activity.start_date | date}} <a ng-click="modalDialogActivityDetails(activity)">{{activity.name}}</a>
+      			{{activity.start_date | date}} <a ng-click="modalDialogActivityDetails(activity.id)">{{activity.name}}</a>
       			</li>
     	</ul>
     	<center>
@@ -183,7 +183,8 @@
 		    Skied <strong>{{statistics.skiedDaysThisSeason}} days</strong> with <strong>{{statistics.skiedKmThisSeason / 1000 | number:0}} km</strong> in <strong>current season</strong>
 		    <a href="#" data-toggle="tooltip" title="Season in our current version means year. However later we plan to add ability to customize meaning of seasons.">*</a>,<br/>
 		    {{statistics.skiedDaysLastSeason}} days with {{statistics.skiedKmLastSeason / 1000 | number:0}} km in previous season and <strong>{{statistics.totalDistance / 1000 | number:0}} km from beginning</strong>.</p>
-		    <p>Longest skiing day at <a ng-click="modalDialogActivityDetails(statistics.longestDayActivity)">{{statistics.longestDayActivity.start_date | date}}</a> with {{statistics.longestDayActivity.distance / 1000 | number:0}} km</p>
+		    <p>Longest skiing day at <a ng-click="modalDialogActivityDetails(statistics.longestDayActivity)">{{statistics.longestDayDate | date}}</a> with {{statistics.longestDayDistance / 1000 | number:0}} km</p>
+		    <p>Max speed recorded at <a ng-click="modalDialogActivityDetails(statistics.maxSpeedActivity)">{{statistics.maxSpeedDate | date}}</a> with {{statistics.maxSpeed * 3600 / 1000 | number:2}} km/h</p>
 		  </div>
 	</div>
 	
