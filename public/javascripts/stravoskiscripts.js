@@ -192,29 +192,23 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 		var mapURL = 'http://maps.googleapis.com/maps/api/staticmap?sensor=false&size=150x150&path=weight:3|color:red|enc:';
 		mapURL += a.map.summary_polyline;
 		
-		var minutes = function(seconds){
-			var result = (Math.floor(seconds/60) - Math.floor(seconds/3600)*60);
-			return (result > 9)? result: '0' + result;
-		}
-		
-		var hours = function(seconds){
-			return Math.floor(seconds/3600);
-		}
-		var details = 'Skiied ' + Math.round(a.distance/1000) + ' km ';
+		var activityModalData = new Object();
+		activityModalData.moving_time = timeFromSeconds(a.moving_time);
+		activityModalData.elapsed_time = timeFromSeconds(a.elapsed_time);
+		activityModalData.downhill_distance = Math.round(a.downhill_distance/1000);
+		activityModalData.distance = Math.round(a.distance/1000);
+		activityModalData.max_speed = Math.round(a.max_speed*3600/1000);
+		activityModalData.average_speed = Math.round(a.average_speed*3600/1000);
 		if(a.location_city != null){
-			details += 'at ' + a.location_city;
+			activityModalData.location = a.location_city;
 		}else if(a.location_state != null){
-			details += 'at ' + a.location_state;
+			activityModalData.location = a.location_state;
+		}else{
+			activityModalData.location = 'is unknown';
 		}
-		details += ' for ' + hours(a.moving_time) 
-		  				+ ':' + minutes(a.moving_time) + ' moving time';
-		details += ' and ' + hours(a.elapsed_time) 
-				+ ':' + minutes(a.elapsed_time) + ' elapsed time. ';
-		
-		details += 'Downhill distance without ski lifts is ' + Math.round(a.downhill_distance/1000) + 'km .';
-		
-		$scope.modalTemplete = 'modalContent.html';
-		$scope.modalDialog(a.name, details, mapURL);
+
+		$scope.modalTemplete = 'modalDialogActivityDetails.html';
+		$scope.modalDialog(a.name, activityModalData, mapURL);
 	  };
 	  
 	$scope.modalDialogFriendCompare = function (f){
@@ -266,4 +260,17 @@ function getAuthCookies(){
 
 function deleteCookie(name) {
     document.cookie = encodeURIComponent(name) + "=deleted; expires=" + new Date(0).toUTCString();
+}
+
+function timeFromSeconds(time){
+	var minutes = function(seconds){
+		var result = (Math.floor(seconds/60) - Math.floor(seconds/3600)*60);
+		return (result > 9)? result: '0' + result;
+	}
+	
+	var hours = function(seconds){
+		return Math.floor(seconds/3600);
+	}
+	
+	return hours(time) + ':' + minutes(time);
 }
