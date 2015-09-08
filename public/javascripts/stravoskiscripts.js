@@ -32,6 +32,7 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	    success(function(data, status, headers, config) {
 	    	$scope.loadActivities();
 	        $scope.loadAthleteStatistics();
+	        $scope.loadFriends();
 	        $scope.updateToSki();
 	    }).
 	    error(function(data, status, headers, config) {
