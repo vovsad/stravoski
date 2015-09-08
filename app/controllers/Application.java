@@ -20,6 +20,8 @@ import models.AthleteModel;
 
 
 
+
+
 import org.jstrava.authenticator.AuthResponse;
 import org.jstrava.authenticator.StravaAuthenticator;
 import org.jstrava.connector.JStravaV3;
@@ -29,8 +31,10 @@ import org.jstrava.entities.stream.Stream;
 
 import play.Logger;
 import play.Play;
+import play.api.mvc.Session;
 import play.libs.Json;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Result;
 
 import com.avaje.ebean.Ebean;
@@ -39,8 +43,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class Application extends Controller {
 	
 	public Result index() {
-		return ok(views.html.index.render(session("Access_token") != null
-				&& !session("Access_token").isEmpty()));
+		return ok(views.html.index.render(request().cookies().get("AUTH_TOKEN") != null 
+				&& request().cookies().get("AUTH_TOKEN").value() != null
+				&& !request().cookies().get("AUTH_TOKEN").value().isEmpty()));
 	}
 
 	public Result tokenExchange(String code) {
@@ -51,8 +56,11 @@ public class Application extends Controller {
 
 		AuthResponse authResponse = authenticator.getToken(code);
 
-		session("Access_token", authResponse.getAccess_token());
-		session("Athlete_id", Long.toString(authResponse.getAthlete().getId()));
+//		session("Access_token", authResponse.getAccess_token());
+//		session("Athlete_id", Long.toString(authResponse.getAthlete().getId()));
+		
+		response().setCookie("AUTH_TOKEN", authResponse.getAccess_token());
+		response().setCookie("ATHLETE_ID", Long.toString(authResponse.getAthlete().getId()));
 
 		return redirect("/index");
 	}
@@ -69,7 +77,7 @@ public class Application extends Controller {
 	}
 
 	private void cacheAthlete() {
-		final JStravaV3 strava = new JStravaV3(session("Access_token"));
+		final JStravaV3 strava = new JStravaV3(request().cookies().get("AUTH_TOKEN").value());
 		final Athlete athlete = strava.getCurrentAthlete();
 
 		
@@ -86,7 +94,7 @@ public class Application extends Controller {
 	}
 
 	private void cacheNewestAthleteActivities() {
-		final JStravaV3 strava = new JStravaV3(session("Access_token"));
+		final JStravaV3 strava = new JStravaV3(request().cookies().get("AUTH_TOKEN").value());
 		
 		for (Activity a : strava.getCurrentAthleteActivities()) {
 			Logger.debug(a.toString());
@@ -106,9 +114,9 @@ public class Application extends Controller {
 	}
 
 	private void cacheOldestAthleteActivities() {
-		final JStravaV3 strava = new JStravaV3(session("Access_token"));
+		final JStravaV3 strava = new JStravaV3(request().cookies().get("AUTH_TOKEN").value());
 
-		Long before = ZonedDateTime.parse(DBController.getMinActivityDate(session("Athlete_id")),
+		Long before = ZonedDateTime.parse(DBController.getMinActivityDate(request().cookies().get("ATHLETE_ID").value()),
 				DateTimeFormatter.ISO_DATE_TIME).toEpochSecond();
 		List<Activity> activities = strava
 				.getCurrentAthleteActivitiesBeforeDate(before);
@@ -133,19 +141,20 @@ public class Application extends Controller {
 	}
 	
 	public Result isDataSynced(){
-		if(session("Access_token") == null 
-				|| session("Access_token").isEmpty()) return unauthorized(Json.parse("{\"unauthorized\": true}"));
+		if(request().cookies().get("AUTH_TOKEN") == null 
+				|| request().cookies().get("AUTH_TOKEN").value() == null 
+				|| request().cookies().get("AUTH_TOKEN").value().isEmpty()) return unauthorized(Json.parse("{\"unauthorized\": true}"));
 
 		return ok(Json.parse("{\"isDataSynced\": " + isLastActivitiesLoaded() + "}"));
 	}
 	
 	private Boolean isLastActivitiesLoaded() {
 	
-		if(DBController.cachedActivitiesCount(session("Athlete_id")) == 0) return false;
+		if(DBController.cachedActivitiesCount(request().cookies().get("ATHLETE_ID").value()) == 0) return false;
 		
-		final JStravaV3 strava = new JStravaV3(session("Access_token"));
+		final JStravaV3 strava = new JStravaV3(request().cookies().get("AUTH_TOKEN").value());
 		
-		Long after = ZonedDateTime.parse(DBController.getMaxActivityDate(session("Athlete_id")),
+		Long after = ZonedDateTime.parse(DBController.getMaxActivityDate(request().cookies().get("ATHLETE_ID").value()),
 				DateTimeFormatter.ISO_DATE_TIME).toEpochSecond();
 		List<Activity> activities = strava
 				.getCurrentAthleteActivitiesAfterDate(after);
@@ -156,7 +165,7 @@ public class Application extends Controller {
 	public Result getDownhillDistanceUpdated() {
 		Logger.debug("Calculate Ski without lifts");
 
-		final JStravaV3 strava = new JStravaV3(session("Access_token"));
+		final JStravaV3 strava = new JStravaV3(request().cookies().get("AUTH_TOKEN").value());
 		Boolean isAnythingUpdated = false;
 
 		for (ActivityModel a: DBController.getSkiActivities(
@@ -173,7 +182,7 @@ public class Application extends Controller {
 		}
 			
 	private int getDownhillDistance(int Id){
-		final JStravaV3 strava = new JStravaV3(session("Access_token"));
+		final JStravaV3 strava = new JStravaV3(request().cookies().get("AUTH_TOKEN").value());
 		
 		Logger.debug("Calculating downhill distance for " + Long.toString(Id));
 		
@@ -209,17 +218,18 @@ public class Application extends Controller {
 	}
 	
 	public Result logout(){
-		session("Access_token", "");
-		session("Athlete_id", "");
+		response().discardCookie("AUTH_TOKEN");
+		response().discardCookie("ATHLETE_ID");
 		return redirect("/index");
 	}
 
 	public Result getActivities() {
-		if(session("Access_token") == null 
-				|| session("Access_token").isEmpty()) return unauthorized(Json.parse("{\"unauthorized\": true}"));
+		if(request().cookies().get("AUTH_TOKEN") != null 
+				&& request().cookies().get("AUTH_TOKEN").value() == null 
+				|| request().cookies().get("AUTH_TOKEN").value().isEmpty()) return unauthorized(Json.parse("{\"unauthorized\": true}"));
 		
 		if(isLastActivitiesLoaded()){
-			return ok(Json.toJson(DBController.getSkiActivities(session("Athlete_id"))));
+			return ok(Json.toJson(DBController.getSkiActivities(request().cookies().get("ATHLETE_ID").value())));
 		}else{
 			syncStravaToDB();
 			return ok(Json.parse("{\"NoActivities\": true}"));
@@ -232,12 +242,14 @@ public class Application extends Controller {
 	}
 	
 	public Result getAthleteStatistics() {
-		if(session("Access_token") == null 
-				|| session("Access_token").isEmpty()) return unauthorized(Json.parse("{\"unauthorized\": true}"));
+		if(request().cookies().get("AUTH_TOKEN") != null 
+				&& request().cookies().get("AUTH_TOKEN").value() == null 
+				|| request().cookies().get("AUTH_TOKEN").value().isEmpty()) return unauthorized(Json.parse("{\"unauthorized\": true}"));
 		
-		return getAthleteStatisticsById(session("Athlete_id"));
+		return getAthleteStatisticsById(request().cookies().get("ATHLETE_ID").value());
 		
 	}
+	
 	public Result getAthleteStatisticsById(String Athlete_id) {
 		List<ActivityModel> activities = DBController.getSkiActivities(Athlete_id);
 		
@@ -263,10 +275,11 @@ public class Application extends Controller {
 	}
 	
 	public Result getFriends(){
-		if(session("Access_token") == null 
-				|| session("Access_token").isEmpty()) return unauthorized(Json.parse("{\"unauthorized\": true}"));
+		if(request().cookies().get("AUTH_TOKEN") == null 
+				|| request().cookies().get("AUTH_TOKEN").value() == null 
+				|| request().cookies().get("AUTH_TOKEN").value().isEmpty()) return unauthorized(Json.parse("{\"unauthorized\": true}"));
 		
-		final JStravaV3 strava = new JStravaV3(session("Access_token"));
+		final JStravaV3 strava = new JStravaV3(request().cookies().get("AUTH_TOKEN").value());
 		List<Athlete> friends = strava.getCurrentAthleteFriends();
 		return ok(Json.toJson(friends.stream().filter(a -> usesStravoski(a)).collect(Collectors.toList())));
 	}

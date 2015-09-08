@@ -11,11 +11,12 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	$scope.showTopMenu = false;
 	
 	$scope.isDataSynced = function () {
-		$http.get('/isdatasynced').
+		$http.get('/isdatasynced', getAuthCookies()).
 	    success(function(data, status, headers, config) {
 	    	if(data.isDataSynced){
 	    		$scope.loadActivities();
 		        $scope.loadAthleteStatistics();
+		        $scope.loadFriends();
 	    	}else{
 	    		$scope.doDataSync();
 	    	}
@@ -27,7 +28,7 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	};
 	
 	$scope.doDataSync = function () {
-		$http.get('/dosync').
+		$http.get('/dosync', getAuthCookies()).
 	    success(function(data, status, headers, config) {
 	    	$scope.loadActivities();
 	        $scope.loadAthleteStatistics();
@@ -39,7 +40,8 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 		
 	};
 	
-	$scope.isDataSynced();
+	if (getCookie("AUTH_TOKEN") != null)
+		$scope.isDataSynced();
 	
 	
 	
@@ -47,7 +49,7 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	$scope.activitiesCurrentPage = 0;
 	$scope.activitiesPerPage = 10;
 	$scope.loadActivities = function () {
-		$http.get('/getactivities').
+		$http.get('/getactivities', getAuthCookies()).
 	    success(function(data, status, headers, config) {
 	      $scope.activities = data;
 	      $scope.pagedActivities = $scope.activities.slice(
@@ -82,7 +84,7 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	
 	$scope.updateToSki = function () {
 		$scope.isUpdatingSkiTracks = true;
-		$http.get('/updatetoski').
+		$http.get('/updatetoski', getAuthCookies()).
 	    success(function(data, status, headers, config) {
 	      if(data.isAnythingUpdated) $scope.loadActivities();
 	      $scope.isUpdatingSkiTracks = false;
@@ -97,7 +99,7 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	
 	
 	$scope.loadAthleteStatistics = function () {
-		  $http.get('/getathletestat').
+		  $http.get('/getathletestat', getAuthCookies()).
 		    success(function(data, status, headers, config) {
 		      $scope.statistics = data;
 		    }).
@@ -113,7 +115,7 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	$scope.friendsPerPage = 5;
 
 	$scope.loadFriends = function () {
-		$http.get('/getfriends').
+		$http.get('/getfriends', getAuthCookies()).
 	    success(function(data, status, headers, config) {
 	      $scope.friends = data;
 	      $scope.pagedFriends = $scope.friends.slice(
@@ -136,10 +138,8 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	};
 
 	
-	$scope.loadFriends();
-	
 	$scope.doSyncWithStrava = function () {
-      	$http.get('/syncwithstrava').
+      	$http.get('/syncwithstrava', getAuthCookies()).
 	    success(function(data, status, headers, config) {
 	    	$scope.modalDialog('Notification', 
 	    			'Your Activities are just synced and cached');
@@ -155,6 +155,7 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	};
 
 	$scope.doLogout = function () {
+		deleteCookie("AUTH_TOKEN");deleteCookie("ATHLETE_ID");
 		$location.path('/logout');
 	   	$scope.isLoaded = false;
 	};
@@ -216,7 +217,7 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	  };
 	  
 	$scope.modalDialogFriendCompare = function (f){
-		  $http.get('/getathletestat/' + f).
+		  $http.get('/getathletestat/' + f, getAuthCookies()).
 		    success(function(data, status, headers, config) {
 		    	$scope.modalTemplete = 'modalDialogFriendCompareContent.html';
 		    		      
@@ -248,3 +249,20 @@ app.controller('ModalInstanceCtrl', function ($scope, $modalInstance, messageBod
 	  };
 });
 
+function getCookie(name) {
+	  var value = "; " + document.cookie;
+	  var parts = value.split("; " + name + "=");
+	  if (parts.length == 2) return parts.pop().split(";").shift();
+	}
+
+function getAuthCookies(){
+	return {headers: {
+		'AUTH_TOKEN': getCookie("AUTH_TOKEN"),
+		'ATHLETE_ID': getCookie("ATHLETE_ID")
+	}
+	};
+}
+
+function deleteCookie(name) {
+    document.cookie = encodeURIComponent(name) + "=deleted; expires=" + new Date(0).toUTCString();
+}
