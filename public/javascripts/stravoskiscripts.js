@@ -142,6 +142,7 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	$scope.doSyncWithStrava = function () {
       	$http.get('/syncwithstrava', getAuthCookies()).
 	    success(function(data, status, headers, config) {
+	    	$scope.modalTemplete = 'modalContent.html';
 	    	$scope.modalDialog('Notification', 
 	    			'Your Activities are just synced and cached');
 
@@ -150,6 +151,7 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 
 	    }).
 	    error(function(data, status, headers, config) {
+	    	$scope.modalTemplete = 'modalContent.html';
 	    	$scope.modalDialog('Error', 
 			'Something goes wrong');
 	    });
@@ -161,7 +163,6 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	   	$scope.isLoaded = false;
 	};
 	
-	$scope.modalTemplete = 'modalContent.html';
 	$scope.modalDialog = function(title, body, image) {
 		var modalInstance = $modal.open({
 		      animation: $scope.animationsEnabled,

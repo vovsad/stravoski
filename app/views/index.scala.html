@@ -66,10 +66,7 @@
     	</div>
     	<div class="modal-body">
 			<div class="row">
-        		<div class="col-md-4" ng-hide="messageImage == ''" >
-          			<img ng-src="{{messageImage}}" style="width: 150px ; height: 150px ;"/>
-        		</div>
-        		<div class="col-md-6">
+        		<div class="col-md-8">
           			{{messageBody}}
         		</div>
       		</div>
@@ -92,16 +89,16 @@
 					<table class="table table-striped table-hover ">
   						<tbody>
     						<tr>
-							<td>You skied <span class="label label-primary">{{messageBody.distance}} km</span> including <span class="label label-primary">{{messageBody.downhill_distance}} km</span> descent only</td>
+							<td>You skied <b>{{messageBody.distance}} km</b> including <b>{{messageBody.downhill_distance}} km</b> descents</td>
     						</tr>
     						<tr>
 							<td>Skiing resort area {{messageBody.location}}</td>
     						</tr>
     						<tr>
-							<td>Time spent <span class="label label-primary">{{messageBody.elapsed_time}}</span> including <span class="label label-primary">{{messageBody.moving_time}}</span> moving time</td>
+							<td>Time spent <b>{{messageBody.elapsed_time}}</b> including <b>{{messageBody.moving_time}}</b> moving time</td>
     						</tr>
     						<tr>
-							<td>Maximum speed recorder <span class="label label-primary">{{messageBody.max_speed}} km/h</span> and average speed was <span class="label label-primary">{{messageBody.average_speed}} km/h</span> </td>
+							<td>Maximum speed recorder <b>{{messageBody.max_speed}} km/h</b> and average speed was <b>{{messageBody.average_speed}} km/h</b> </td>
     						</tr>
   						</tbody>
 					</table>
