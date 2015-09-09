@@ -282,8 +282,7 @@ public class Application extends Controller {
 		
 		final JStravaV3 strava = new JStravaV3(request().cookies().get("AUTH_TOKEN").value());
 		List<Athlete> friends = strava.getCurrentAthleteFriends();
-		//return ok(Json.toJson(friends.stream().filter(a -> usesStravoski(a)).collect(Collectors.toList())));
-		return ok(Json.toJson(new java.util.ArrayList()));
+		return ok(Json.toJson(friends.stream().filter(a -> usesStravoski(a)).collect(Collectors.toList())));
 	}
 	
 	private Boolean usesStravoski(Athlete a){
