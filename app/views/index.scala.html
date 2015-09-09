@@ -151,10 +151,10 @@
 	<div class="panel panel-default">
 	  <div class="panel-heading">Your activities</div>
 	  <div class="panel-body">
-	  	<div ng-show="isLoadingActivities" class="alert alert-dismissible alert-info">
+	  	<div ng-show="isLoadingActivities" class="alert alert-dismissible alert-warning">
   			<strong>Heads up!</strong> Your activities are being syncronized now, please keep calm and wait a bit.
 		</div>
-	  	<div ng-show="isUpdatingSkiTracks" class="alert alert-dismissible alert-info">
+	  	<div ng-show="isUpdatingSkiTracks" class="alert alert-dismissible alert-warning">
   			<strong>We still are doing some magic in background.</strong> Your ski activities are being processing now, it can take some time. You can use the system however skied distanse without lifts will remain as zero till the end of this process.
 		</div>
 	  
@@ -191,8 +191,12 @@
 	<div class="panel panel-default">
 		  <div class="panel-heading">Compare to Friends</div>
 		  <div class="panel-body">
-		  	<div ng-show="isLoadingFriends" class="alert alert-dismissible alert-info">
+		  	<div ng-show="isLoadingFriends" class="alert alert-dismissible alert-warning">
 	  			<strong>Friends Will Be Friends!</strong> Are your friends skiing as well? Their activities should be here shortly.
+			</div>
+			<div ng-show="pagedFriends.length == 0" class="alert alert-dismissible alert-success">
+	  			<strong>Where are your friends?</strong> Are your friends skiing as well? It seems we do not know about your Strava mates yet but you can invite them.
+	  			<div class="fb-share-button" data-href="https://stravoski.com/" data-layout="icon_link"></div>
 			</div>
 			<ul ng-repeat="friend in pagedFriends" class="list-group">
       			<li class="list-group-item"><a ng-click="modalDialogFriendCompare(friend.id)">{{friend.firstname}} {{friend.lastname}}</a></li>
