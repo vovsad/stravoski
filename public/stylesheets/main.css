@@ -8,4 +8,28 @@ background-size: cover;
 
 .navbar-inverse {
     background: rgba(0,0,0,0.4);
+	width: 100%;
+
+}
+
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  /* Margin bottom by footer height */
+  margin-bottom: 160px;
+}
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: 160px;
+  background: rgba(0,0,0,0.4);
+}
+.footertext{
+	color: #bbbbbb;
 }
