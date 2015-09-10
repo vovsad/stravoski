@@ -49,11 +49,10 @@ public class Application extends Controller {
 	}
 
 	public Result tokenExchange(String code) {
-		String host = Play.application().configuration().getString("stravoski.host");
 		StravaAuthenticator authenticator = new StravaAuthenticator(1455,
-				"http://" + host + "/tokenexchange",
-				"");
-
+				"http://" + Play.application().configuration().getString("stravoski.host") + "/tokenexchange",
+				Play.application().configuration().getString("stravoski.key"));
+		
 		AuthResponse authResponse = authenticator.getToken(code);
 
 //		session("Access_token", authResponse.getAccess_token());
