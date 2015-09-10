@@ -52,7 +52,7 @@ public class Application extends Controller {
 		String host = Play.application().configuration().getString("stravoski.host");
 		StravaAuthenticator authenticator = new StravaAuthenticator(1455,
 				"http://" + host + "/tokenexchange",
-				"22122cf967940aa0d142f51ca987b878aba948eb");
+				"");
 
 		AuthResponse authResponse = authenticator.getToken(code);
 
