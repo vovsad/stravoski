@@ -20,7 +20,7 @@ GET		/getfriends							controllers.Application.getFriends()
 
 #Backgroud actions
 GET     /syncwithstrava						controllers.Application.getActivitiesSynced()
-GET     /updatetoski						controllers.Application.getDownhillDistanceUpdated()
+GET     /updatetoski						controllers.Application.getActivityCalculated()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               		controllers.Assets.versioned(path="/public", file: Asset)

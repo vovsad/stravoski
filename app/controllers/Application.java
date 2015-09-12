@@ -161,7 +161,7 @@ public class Application extends Controller {
 		return activities.isEmpty();
 	}
 
-	public Result getDownhillDistanceUpdated() {
+	public Result getActivityCalculated() {
 		Logger.debug("Calculate Ski without lifts");
 
 		final JStravaV3 strava = new JStravaV3(request().cookies().get("AUTH_TOKEN").value());
@@ -185,8 +185,7 @@ public class Application extends Controller {
 		
 		Logger.debug("Calculating downhill distance for " + Long.toString(Id));
 		
-		final String[] types = {"distance", "altitude"}; 
-		final List<Stream> streams= strava.findActivityStreams(Id, types);
+		final List<Stream> streams = getStream(Id, strava);
 
 		List<SimpleEntry<Double, Double>> streamsDataOriginal = new LinkedList<>();
 		Iterator<Object> distance = streams.get(1).getData().iterator();
@@ -208,6 +207,12 @@ public class Application extends Controller {
 		}
 		return downhillDistance.intValue();
 		
+	}
+
+	private List<Stream> getStream(int Id, final JStravaV3 strava) {
+		final String[] types = {"distance", "altitude"}; 
+		final List<Stream> streams= strava.findActivityStreams(Id, types);
+		return streams;
 	}
 	
 
