@@ -2,11 +2,15 @@ package controllers;
 
 import java.util.List;
 
+import org.jstrava.entities.athlete.Athlete;
+
 import models.ActivityModel;
 import models.AthleteModel;
 
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.SqlQuery;
+import com.avaje.ebean.SqlUpdate;
+import com.avaje.ebean.Update;
 
 import play.Logger;
 import play.mvc.Controller;
@@ -46,6 +50,17 @@ public class DBController extends Controller {
 	public static AthleteModel getAthlete(String id) {
 		return Ebean.find(AthleteModel.class).
 				where("id =:athlete_id").setParameter("athlete_id", id).findUnique();
+		
+	}
+	
+	public static void removeAthlete(String id){
+		Logger.debug(id);
+		AthleteModel a = Ebean.find(AthleteModel.class, id);
+		Ebean.delete(a);
+		
+		Update<ActivityModel> upd = Ebean.createUpdate(ActivityModel.class, "delete from activity_model where athlete_id=:id");
+		upd.set("id", id);
+		upd.execute();
 		
 	}
 	

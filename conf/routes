@@ -17,6 +17,7 @@ GET		/getathletestat						controllers.Application.getAthleteStatistics()
 GET		/getathletestat/:id					controllers.Application.getAthleteStatisticsById(id)
 GET		/isdatasynced						controllers.Application.isDataSynced()
 GET		/getfriends							controllers.Application.getFriends()
+GET		/removeme							controllers.Application.removeMe()
 
 #Backgroud actions
 GET     /syncwithstrava						controllers.Application.getActivitiesSynced()
