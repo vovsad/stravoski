@@ -56,14 +56,16 @@
 
 	<footer class="footer">
       <div class="container">
-      	<div class="col-md-2">
+      	<div class="col-xs-2">
 	      	<h4 class="footertext">About</h4>
 	      	<p><a ng-click="contactText = false;issueText = false;aboutText = true;">Project</a></p>
 			<p><a ng-click="aboutText = false;issueText = false;contactText = true;">Contact Us</a></p>
 	      	<p><a ng-click="aboutText = false;contactText = false;issueText = true;">Report an issue</a></p>
       	</div>
-      	<div class="col-md-10">
+      	<div class="col-xs-10">
       		<p ng-show="aboutText" class="footertext">STRAVOSKI is Web client for <a href="strava.com">Strava</a> users with dedication to alpine skiing. Strava itself is wonderful application but generally targeting to cyclists and runners. Here is an attempt to utilize Strava potential for alpine skiing. This app works with Strava API and collects activities marked as Alpine Ski. Collected activities are analyzed and lifts are deducted from total distance. Deduction is done on altitude analysis so it may be not really accurate now.</p>
+      		<p ng-show="aboutText" class="footertext">All trademarks displayed are property of their respective owners</p>
+      		<p ng-show="aboutText" class="footertext">STRAVOSKI is an <a href="https://github.com/vovsad/stravoski">open source project</a> by <a href="info@@stravoski.com">Volodymyr Sadovyy</a></p>
       		<p ng-show="contactText" class="footertext">Please fill free to contact us through email info@@stravoski.com.</p>
       		<p ng-show="issueText" class="footertext">Report issue with <a href="https://github.com/vovsad/stravoski/issues/new">GitHub</a>. Yes, probably it is a bit weird but GitHub allows to track issues as well and I do not see appropriate, free and already hosted system.</p>
       	</div>
