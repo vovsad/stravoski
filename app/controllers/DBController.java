@@ -10,7 +10,6 @@ import models.AthleteModel;
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.SqlQuery;
 import com.avaje.ebean.SqlUpdate;
-import com.avaje.ebean.Update;
 
 import play.Logger;
 import play.mvc.Controller;
@@ -54,12 +53,11 @@ public class DBController extends Controller {
 	}
 	
 	public static void removeAthlete(String id){
-		Logger.debug(id);
-		AthleteModel a = Ebean.find(AthleteModel.class, id);
-		Ebean.delete(a);
-		
-		Update<ActivityModel> upd = Ebean.createUpdate(ActivityModel.class, "delete from activity_model where athlete_id=:id");
-		upd.set("id", id);
+		SqlUpdate upd = Ebean.createSqlUpdate("delete from athlete_model, activity_model, polyline_model " + 
+						"using athlete_model inner join activity_model inner join polyline_model " +
+						"where athlete_model.id = activity_model.athlete_id and activity_model.map_id = polyline_model.id " +
+						"and athlete_model.id=:id");
+		upd.setParameter("id", id);
 		upd.execute();
 		
 	}

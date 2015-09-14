@@ -79,7 +79,7 @@ create table polyline_model (
   constraint pk_polyline_model primary key (id))
  engine=InnoDB default charset=utf8;
 
-alter table activity_model add constraint fk_activity_model_map_1 foreign key (map_id) references polyline_model (id) on delete cascade on update restrict;
+alter table activity_model add constraint fk_activity_model_map_1 foreign key (map_id) references polyline_model (id) on delete cascade on update cascade;
 create index ix_activity_model_map_1 on activity_model (map_id);
 
 
