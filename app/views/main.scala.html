@@ -26,7 +26,7 @@
 	  fjs.parentNode.insertBefore(js, fjs);
 	}(document, 'script', 'facebook-jssdk'));</script>
 
-    <div ng-controller="TopCtrl">
+    <div ng-controller="TopCtrl" id="wrap">
 		<nav class="navbar navbar-inverse">
 		  <div class="container-fluid">
 		    <div class="navbar-header">
@@ -54,8 +54,8 @@
 	    </div>
 
     </div>
-
-	<footer class="footer">
+    
+    <div id="footer">
       <div class="container">
       	<div class="col-xs-2">
 	      	<h4 class="footertext">About</h4>
@@ -71,7 +71,7 @@
       		<p ng-show="issueText" class="footertext">Report issue with <a href="https://github.com/vovsad/stravoski/issues/new">GitHub</a>. Yes, probably it is a bit weird but GitHub allows to track issues as well and I do not see appropriate, free and already hosted system.</p>
       	</div>
       </div>
-    </footer>
-    
+    </div>
+
     </body>
 </html>

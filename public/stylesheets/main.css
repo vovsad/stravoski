@@ -14,22 +14,27 @@ background-size: cover;
 
 /* Sticky footer styles
 -------------------------------------------------- */
-html {
-  position: relative;
-  min-height: 100%;
-}
+
+html,
 body {
-  /* Margin bottom by footer height */
-  margin-bottom: 160px;
+  height: 100%;
+  /* The html and body elements cannot have any padding or margin. */
 }
-.footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  /* Set the fixed height of the footer here */
-  
+
+/* Wrapper for page content to push down footer */
+#wrap {
+  min-height: 100%;
+  height: auto;
+  /* Negative indent footer by its height */
+  margin: 0 auto -60px;
+  /* Pad bottom by footer height */
+  padding: 0 0 60px;
+}
+
+/* Set the fixed height of the footer here */
+#footer {
   background: rgba(0,0,0,0.4);
 }
 .footertext{
-	color: #bbbbbb;
+	color: #CCCCCC;
 }
