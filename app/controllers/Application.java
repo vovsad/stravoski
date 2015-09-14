@@ -161,7 +161,7 @@ public class Application extends Controller {
 		return activities.isEmpty();
 	}
 
-	public Result getDownhillDistanceUpdated() {
+	public Result getActivityCalculated() {
 		Logger.debug("Calculate Ski without lifts");
 
 		final JStravaV3 strava = new JStravaV3(request().cookies().get("AUTH_TOKEN").value());
@@ -181,12 +181,9 @@ public class Application extends Controller {
 		}
 			
 	private int getDownhillDistance(int Id){
-		final JStravaV3 strava = new JStravaV3(request().cookies().get("AUTH_TOKEN").value());
-		
 		Logger.debug("Calculating downhill distance for " + Long.toString(Id));
 		
-		final String[] types = {"distance", "altitude"}; 
-		final List<Stream> streams= strava.findActivityStreams(Id, types);
+		final List<Stream> streams = getStream(Id);
 
 		List<SimpleEntry<Double, Double>> streamsDataOriginal = new LinkedList<>();
 		Iterator<Object> distance = streams.get(1).getData().iterator();
@@ -208,6 +205,13 @@ public class Application extends Controller {
 		}
 		return downhillDistance.intValue();
 		
+	}
+
+	private List<Stream> getStream(int Id) {
+		final JStravaV3 strava = new JStravaV3(request().cookies().get("AUTH_TOKEN").value());
+		final String[] types = {"distance", "altitude"}; 
+		final List<Stream> streams= strava.findActivityStreams(Id, types);
+		return streams;
 	}
 	
 
@@ -272,6 +276,12 @@ public class Application extends Controller {
 			
 			return ok(statistics.asJson());
 		}
+	}
+	
+	public Result removeMe(){
+		
+		DBController.removeAthlete(request().cookies().get("ATHLETE_ID").value());
+		return redirect("/logout");
 	}
 	
 	public Result getFriends(){
