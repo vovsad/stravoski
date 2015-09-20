@@ -167,14 +167,14 @@ public class Application extends Controller {
 		final JStravaV3 strava = new JStravaV3(request().cookies().get("AUTH_TOKEN").value());
 		Boolean isAnythingUpdated = false;
 
-//		for (ActivityModel a: DBController.getSkiActivities(
-//								Long.toString(strava.getCurrentAthlete().getId()))){
-//			if(a.downhill_distance == 0){
-//				a.setDownhill_distance(getDownhillDistance(a.id));
-//				a.update();
-//				isAnythingUpdated = true;
-//			}
-//		}
+		for (ActivityModel a: DBController.getSkiActivities(
+								Long.toString(strava.getCurrentAthlete().getId()))){
+			if(a.downhill_distance == 0){
+				a.setDownhill_distance(getDownhillDistance(a.id));
+				a.update();
+				isAnythingUpdated = true;
+			}
+		}
 		
 		return ok(Json.parse("{\"isAnythingUpdated\":" + isAnythingUpdated + "}"));
 		
