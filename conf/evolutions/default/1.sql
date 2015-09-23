@@ -1,3 +1,6 @@
+--- # --- Created by Ebean DDL
+--- # To stop Ebean DDL generation, remove this comment and start using Evolutions
+
 # --- !Ups
 
 create table activity_model (
@@ -44,8 +47,9 @@ create table activity_model (
   calories                  float,
   truncated                 integer,
   has_kudoed                tinyint(1) default 0,
-  start_date_asdate         datetime,
-  downhill_distance          float,
+  downhill_distance         float,
+  average_downhill_grade    integer,
+  average_downhill_2grade    integer,
   constraint uq_activity_model_map_id unique (map_id),
   constraint pk_activity_model primary key (id))
  engine=InnoDB default charset=utf8;
@@ -79,10 +83,32 @@ create table polyline_model (
   constraint pk_polyline_model primary key (id))
  engine=InnoDB default charset=utf8;
 
-alter table activity_model add constraint fk_activity_model_map_1 foreign key (map_id) references polyline_model (id) on delete cascade on update cascade;
+create table slope_model (
+  id                        integer auto_increment not null,
+  average_grade             integer,
+  length                    integer,
+  start_lat                 varchar(255),
+  start_lng                 varchar(255),
+  end_lat                   varchar(255),
+  end_lng                   varchar(255),
+  constraint pk_slope_model primary key (id))
+ engine=InnoDB default charset=utf8;
+
+
+create table activity_model_slope_model (
+  activity_model_id              integer not null,
+  slope_model_id                 integer not null,
+  constraint pk_activity_model_slope_model primary key (activity_model_id, slope_model_id))
+ engine=InnoDB default charset=utf8;
+
+alter table activity_model add constraint fk_activity_model_map_1 foreign key (map_id) references polyline_model (id) on delete restrict on update restrict;
 create index ix_activity_model_map_1 on activity_model (map_id);
 
 
+
+alter table activity_model_slope_model add constraint fk_activity_model_slope_model_activity_model_01 foreign key (activity_model_id) references activity_model (id) on delete restrict on update restrict;
+
+alter table activity_model_slope_model add constraint fk_activity_model_slope_model_slope_model_02 foreign key (slope_model_id) references slope_model (id) on delete restrict on update restrict;
 
 # --- !Downs
 
@@ -90,9 +116,13 @@ SET FOREIGN_KEY_CHECKS=0;
 
 drop table activity_model;
 
+drop table activity_model_slope_model;
+
 drop table athlete_model;
 
 drop table polyline_model;
+
+drop table slope_model;
 
 SET FOREIGN_KEY_CHECKS=1;
 

@@ -1,31 +1,19 @@
 package models;
 
-import java.lang.reflect.Array;
-import java.sql.Date;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.CascadeType;
-import javax.persistence.Embeddable;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
-import javax.validation.Constraint;
 
 import org.jstrava.entities.activity.Activity;
-import org.jstrava.entities.activity.Polyline;
-import org.jstrava.entities.activity.SplitsMetric;
-import org.jstrava.entities.activity.SplitsStandard;
-import org.jstrava.entities.athlete.Athlete;
-import org.jstrava.entities.segment.SegmentEffort;
 
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Model;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gson.annotations.SerializedName;
 
 import play.data.validation.*;
@@ -85,9 +73,10 @@ public class ActivityModel extends Model {
 //    public List<SplitsStandard> splits_standard;
 //    public List<SegmentEffort> best_efforts;
 
-    @JsonIgnore
-    public ZonedDateTime start_date_asdate;
     public float downhill_distance;
+    public int average_downhill_grade;
+    @ManyToMany(cascade = CascadeType.ALL)
+    public List<SlopeModel> slopes;
     
     public ActivityModel() {}
     
@@ -136,9 +125,6 @@ public class ActivityModel extends Model {
 	    calories = a.getCalories();
 	    truncated = a.getTruncated();
 	    has_kudoed = a.getHas_kudoed();
-	    
-	    start_date_asdate = ZonedDateTime.parse(start_date,
-				DateTimeFormatter.ISO_DATE_TIME);
 	}
 	
 	public Activity getActivity(){
@@ -198,8 +184,14 @@ public class ActivityModel extends Model {
     //http://stackoverflow.com/questions/11699757/ebean-is-not-doing-updates-its-trying-to-do-inserts-and-failing
 	public void setDownhill_distance(int i) {
 		downhill_distance = i;
+	}
+	
+	public ZonedDateTime getStartDateAsDate() {
+		return ZonedDateTime.parse(start_date,
+				DateTimeFormatter.ISO_DATE_TIME);
 		
 	}
+
 
 
 }

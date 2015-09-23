@@ -11,16 +11,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import models.ActivityModel;
 import models.AthleteModel;
-//import controllers.DBController;
-
-
-
-
-
-
-
 
 import org.jstrava.authenticator.AuthResponse;
 import org.jstrava.authenticator.StravaAuthenticator;
@@ -32,6 +26,7 @@ import org.jstrava.entities.stream.Stream;
 import play.Logger;
 import play.Play;
 import play.api.mvc.Session;
+import play.cache.CacheApi;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -41,6 +36,9 @@ import com.avaje.ebean.Ebean;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class Application extends Controller {
+	
+	@Inject CacheApi cache;
+
 	
 	public Result index() {
 		return ok(views.html.index.render(request().cookies().get("AUTH_TOKEN") != null 
@@ -55,9 +53,6 @@ public class Application extends Controller {
 		
 		AuthResponse authResponse = authenticator.getToken(code);
 
-//		session("Access_token", authResponse.getAccess_token());
-//		session("Athlete_id", Long.toString(authResponse.getAthlete().getId()));
-		
 		response().setCookie("AUTH_TOKEN", authResponse.getAccess_token());
 		response().setCookie("ATHLETE_ID", Long.toString(authResponse.getAthlete().getId()));
 
@@ -180,21 +175,11 @@ public class Application extends Controller {
 		
 		}
 			
-	private int getDownhillDistance(int Id){
-		Logger.debug("Calculating downhill distance for " + Long.toString(Id));
+	private int getDownhillDistance(int id){
+		Logger.debug("Calculating downhill distance for " + Long.toString(id));
 		
-		final List<Stream> streams = getStream(Id);
-
-		List<SimpleEntry<Double, Double>> streamsDataOriginal = new LinkedList<>();
-		Iterator<Object> distance = streams.get(1).getData().iterator();
-		Iterator<Object> altitude = streams.get(0).getData().iterator();
-		for (; altitude.hasNext() && distance.hasNext();) {
-			streamsDataOriginal.add(new AbstractMap.SimpleEntry<>((Double)distance
-					.next(), (Double)altitude.next()));
-		}
-
 		Double previousAltitudePoint = 0.0, previousDistancePoint = 0.0, downhillDistance = 0.0;
-		for (SimpleEntry<Double, Double> i : streamsDataOriginal) {
+		for (SimpleEntry<Double, Double> i : StreamAsList(id)) {
 
 			if (i.getKey() <= previousAltitudePoint) {
 				downhillDistance += i.getValue() - previousDistancePoint;
@@ -206,14 +191,47 @@ public class Application extends Controller {
 		return downhillDistance.intValue();
 		
 	}
+	
+	private int getAverageGrade(int id){
+		Logger.debug("Detecting slopes for " + Long.toString(id));
+		
+		Double previousAltitudePoint = 0.0, previousDistancePoint = 0.0, downhillDistance = 0.0;
+		for (SimpleEntry<Double, Double> i : StreamAsList(id)) {
+
+			if (i.getKey() <= previousAltitudePoint) {
+				downhillDistance += i.getValue() - previousDistancePoint;
+			}
+			previousAltitudePoint = i.getKey();
+			previousDistancePoint = i.getValue();
+
+		}
+		return downhillDistance.intValue();
+	}
 
 	private List<Stream> getStream(int Id) {
-		final JStravaV3 strava = new JStravaV3(request().cookies().get("AUTH_TOKEN").value());
-		final String[] types = {"distance", "altitude"}; 
-		final List<Stream> streams= strava.findActivityStreams(Id, types);
-		return streams;
+		return cache.getOrElse("stream" + Id, () -> {
+			final JStravaV3 strava = new JStravaV3(request().cookies().get("AUTH_TOKEN").value());
+			final String[] types = {"distance", "altitude"}; 
+			final List<Stream> streams= strava.findActivityStreams(Id, types);
+			return streams;
+			
+		});
 	}
 	
+	
+	private List<SimpleEntry<Double, Double>> StreamAsList(int id){
+		
+		List<SimpleEntry<Double, Double>> streamsDataOriginal = new LinkedList<>();
+		Iterator<Object> distance = getStream(id).get(1).getData().iterator();
+		Iterator<Object> altitude = getStream(id).get(0).getData().iterator();
+		
+		for (; altitude.hasNext() && distance.hasNext();) {
+			streamsDataOriginal.add(new AbstractMap.SimpleEntry<>((Double)distance
+					.next(), (Double)altitude.next()));
+		}
+		
+		return streamsDataOriginal;
+	}
 
 	public Result login() {
 		String host = Play.application().configuration().getString("stravoski.host");
@@ -381,19 +399,18 @@ public class Application extends Controller {
 		}
 
 		public void collectSeasonData(ActivityModel a) {
-			if(a.start_date_asdate.getDayOfMonth() != previousActivityDate.getDayOfMonth()){
-				if(a.start_date_asdate.getYear() == ZonedDateTime.now().getYear()){
+			if(a.getStartDateAsDate().getDayOfMonth() != previousActivityDate.getDayOfMonth()){
+				if(a.getStartDateAsDate().getYear() == ZonedDateTime.now().getYear()){
 					daysThisSeason++;
-					//TODO:kmThisSeason should be out of outer if, isn't it? 
 					kmThisSeason += a.distance;
 				}
 	
-				if(a.start_date_asdate.getYear() == ZonedDateTime.now().getYear() - 1){
+				if(a.getStartDateAsDate().getYear() == ZonedDateTime.now().getYear() - 1){
 					daysLastSeason++;
 					kmLastSeason += a.distance;
 				}
 			}
-			previousActivityDate = a.start_date_asdate;
+			previousActivityDate = a.getStartDateAsDate();
 		}
 	}
 	
