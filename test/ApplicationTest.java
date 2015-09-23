@@ -16,8 +16,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import controllers.Application;
 import play.Logger;
+import play.Play;
 import play.libs.Json;
 import play.mvc.Http;
+import play.mvc.Http.Cookie;
 import play.mvc.Result;
 import play.test.FakeApplication;
 import play.test.WithApplication;
@@ -60,8 +62,8 @@ public class ApplicationTest extends WithApplication {
     	RequestBuilder request = new RequestBuilder()
         .method(GET)
         .uri("/getactivities")
-        .session("Access_token", "e20942cef5847011398f80e964cdff4c825675a1")
-        .session("Athlete_id", "9580110");
+        .cookie(new Cookie("AUTH_TOKEN", Play.application().configuration().getString("stravoski.test.token"), 3600, "", "", false, true))
+        .cookie(new Cookie("ATHLETE_ID", Play.application().configuration().getString("stravoski.test.athlete_id"), 3600, "", "", false, true));
 
     	Result result = route(request);
         assertEquals(OK, result.status());
@@ -77,8 +79,8 @@ public class ApplicationTest extends WithApplication {
     	RequestBuilder request = new RequestBuilder()
         .method(GET)
         .uri("/getathletestat")
-        .session("Access_token", "e20942cef5847011398f80e964cdff4c825675a1")
-        .session("Athlete_id", "9580110");
+        .cookie(new Cookie("AUTH_TOKEN", Play.application().configuration().getString("stravoski.test.token"), 3600, "", "", false, true))
+        .cookie(new Cookie("ATHLETE_ID", Play.application().configuration().getString("stravoski.test.athlete_id"), 3600, "", "", false, true));
 
     	Result result = route(request);
     	
@@ -86,7 +88,7 @@ public class ApplicationTest extends WithApplication {
         assertEquals("application/json", result.contentType());
 
         JsonNode resultAsJson = Json.parse(contentAsString(result));
-    	assertEquals(588.95074,
+    	assertEquals(588950.75,
     			resultAsJson.get("totalDistance").asDouble(), 
     			0.001);
 
@@ -98,8 +100,8 @@ public class ApplicationTest extends WithApplication {
     	RequestBuilder request = new RequestBuilder()
         .method(GET)
         .uri("/isdatasynced")
-        .session("Access_token", "e20942cef5847011398f80e964cdff4c825675a1")
-        .session("Athlete_id", "9580110");
+        .cookie(new Cookie("AUTH_TOKEN", Play.application().configuration().getString("stravoski.test.token"), 3600, "", "", false, true))
+        .cookie(new Cookie("ATHLETE_ID", Play.application().configuration().getString("stravoski.test.athlete_id"), 3600, "", "", false, true));
 
     	Result result = route(request);
     	
@@ -124,8 +126,8 @@ public class ApplicationTest extends WithApplication {
     	RequestBuilder request = new RequestBuilder()
         .method(GET)
         .uri("/isdatasynced")
-        .session("Access_token", "e20942cef5847011398f80e964cdff4c825675a1")
-        .session("Athlete_id", "9580110");
+        .cookie(new Cookie("AUTH_TOKEN", Play.application().configuration().getString("stravoski.test.token"), 3600, "", "", false, true))
+        .cookie(new Cookie("ATHLETE_ID", Play.application().configuration().getString("stravoski.test.athlete_id"), 3600, "", "", false, true));
 
     	Result result = route(request);
     	
@@ -138,8 +140,8 @@ public class ApplicationTest extends WithApplication {
     	request = new RequestBuilder()
         .method(GET)
         .uri("/dosync")
-        .session("Access_token", "e20942cef5847011398f80e964cdff4c825675a1")
-        .session("Athlete_id", "9580110");
+        .cookie(new Cookie("AUTH_TOKEN", Play.application().configuration().getString("stravoski.test.token"), 3600, "", "", false, true))
+        .cookie(new Cookie("ATHLETE_ID", Play.application().configuration().getString("stravoski.test.athlete_id"), 3600, "", "", false, true));
     	result = route(request);
 
     }
