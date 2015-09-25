@@ -6,7 +6,7 @@ import com.google.common.collect.HashBasedTable;
 
 import org.jstrava.entities.stream.Stream;
 
-public class StreamsUnnested extends Stream {
+public class StreamsUnnested {
 	private static final Object DISTANCE = "distance";
 	private static final Object ALTITUDE = "altitude";
 	private static final Object GRADE = "grade_smooth";

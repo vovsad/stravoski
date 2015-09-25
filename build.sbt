@@ -14,7 +14,10 @@ libraryDependencies ++= Seq(
   "com.google.guava" % "guava" % "18.0",
   "mysql" % "mysql-connector-java" % "5.1.35",
   "org.mockito" % "mockito-core" % "2.0.28-beta"
+//  ,"org.powermock" % "powermock-mockito-release-full" % "1.6.2"
 )
+
+
 
 // Play provides two styles of routers, one expects its actions to be injected, the
 // other, legacy style, accesses its actions statically.
@@ -22,5 +25,7 @@ routesGenerator := InjectedRoutesGenerator
 
 
 fork in run := false
+
+fork in test := false
 
 javaOptions in Test += "-Dconfig.file=conf/application.test.conf"

@@ -15,6 +15,7 @@ import javax.inject.Inject;
 
 import models.ActivityModel;
 import models.AthleteModel;
+import models.StreamsUnnested;
 
 import org.jstrava.authenticator.AuthResponse;
 import org.jstrava.authenticator.StravaAuthenticator;
@@ -34,6 +35,7 @@ import play.mvc.Result;
 
 import com.avaje.ebean.Ebean;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.Table;
 
 public class Application extends Controller {
 	
@@ -175,7 +177,7 @@ public class Application extends Controller {
 		
 		}
 			
-	private int getDownhillDistance(int id){
+	public int getDownhillDistance(int id){
 		Logger.debug("Calculating downhill distance for " + Long.toString(id));
 		
 		Double previousAltitudePoint = 0.0, previousDistancePoint = 0.0, downhillDistance = 0.0;
@@ -192,33 +194,45 @@ public class Application extends Controller {
 		
 	}
 	
-	private int getAverageGrade(int id){
+	public double getAverageGrade(int id){
 		Logger.debug("Detecting slopes for " + Long.toString(id));
 		
-		Double previousAltitudePoint = 0.0, previousDistancePoint = 0.0, downhillDistance = 0.0;
+		Double previousAltitudePoint = 0.0, grade = 0.0;
+		int count = 0;
 		for (SimpleEntry<Double, Double> i : StreamAsList(id)) {
 
 			if (i.getKey() <= previousAltitudePoint) {
-				downhillDistance += i.getValue() - previousDistancePoint;
+				grade += i.getValue();
 			}
 			previousAltitudePoint = i.getKey();
-			previousDistancePoint = i.getValue();
+			count++;
 
 		}
-		return downhillDistance.intValue();
+		return grade/count;
 	}
 
-	private List<Stream> getStream(int Id) {
-		return cache.getOrElse("stream" + Id, () -> {
+	public List<Stream> getStream(int id) {
+		return cache.getOrElse("stream" + id, () -> {
 			final JStravaV3 strava = new JStravaV3(request().cookies().get("AUTH_TOKEN").value());
 			final String[] types = {"distance", "altitude"}; 
-			final List<Stream> streams= strava.findActivityStreams(Id, types);
-			return streams;
+			final List<Stream> streamsAsStravaTracks = strava.findActivityStreams(id, types);
+			
+			Table<Double, Double, Double> unnested;
+			StreamsUnnested streams = new StreamsUnnested();
+			
+			for (Stream s: streamsAsStravaTracks){
+				streams.setData(s);
+			}
+			//TODO:
+			streams.getMergedStreams();
+			
+			
+			return streamsAsStravaTracks;
 			
 		});
 	}
 	
-	
+	//TODO:Remove this method
 	private List<SimpleEntry<Double, Double>> StreamAsList(int id){
 		
 		List<SimpleEntry<Double, Double>> streamsDataOriginal = new LinkedList<>();
