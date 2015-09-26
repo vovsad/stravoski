@@ -59,7 +59,8 @@ public class ApplicationTest extends WithApplication {
     	doReturn(streams).when(mockedApp).getStream(-1);
     	
     	assertEquals(3343, mockedApp.getDownhillDistance(-1));
-    }
+    	assertEquals(0.87399, mockedApp.getAverageGrade(-1), 0.001);
+      }
 
 
 

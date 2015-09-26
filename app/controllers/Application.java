@@ -36,6 +36,7 @@ import play.mvc.Result;
 import com.avaje.ebean.Ebean;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Table;
+import com.google.common.collect.Table.Cell;
 
 public class Application extends Controller {
 	
@@ -181,15 +182,16 @@ public class Application extends Controller {
 		Logger.debug("Calculating downhill distance for " + Long.toString(id));
 		
 		Double previousAltitudePoint = 0.0, previousDistancePoint = 0.0, downhillDistance = 0.0;
-		for (SimpleEntry<Double, Double> i : StreamAsList(id)) {
-
-			if (i.getKey() <= previousAltitudePoint) {
-				downhillDistance += i.getValue() - previousDistancePoint;
+		Table<Double, Double, Double> unnested = getStreamsAsTable(getStream(id));
+		
+		for (Cell<Double, Double, Double> cell: unnested.cellSet()){
+			if(cell.getColumnKey() <= previousAltitudePoint){
+				downhillDistance += cell.getRowKey() - previousDistancePoint;
 			}
-			previousAltitudePoint = i.getKey();
-			previousDistancePoint = i.getValue();
-
+			previousAltitudePoint = cell.getColumnKey();
+			previousDistancePoint = cell.getRowKey();
 		}
+		
 		return downhillDistance.intValue();
 		
 	}
@@ -197,15 +199,17 @@ public class Application extends Controller {
 	public double getAverageGrade(int id){
 		Logger.debug("Detecting slopes for " + Long.toString(id));
 		
+		Table<Double, Double, Double> unnested = getStreamsAsTable(getStream(id));
 		Double previousAltitudePoint = 0.0, grade = 0.0;
 		int count = 0;
-		for (SimpleEntry<Double, Double> i : StreamAsList(id)) {
+		for (Cell<Double, Double, Double> cell: unnested.cellSet()) {
 
-			if (i.getKey() <= previousAltitudePoint) {
-				grade += i.getValue();
+			if (cell.getColumnKey() <= previousAltitudePoint) {
+				grade += -cell.getValue();
+				count++;
 			}
-			previousAltitudePoint = i.getKey();
-			count++;
+			previousAltitudePoint = cell.getColumnKey();
+			
 
 		}
 		return grade/count;
@@ -216,19 +220,8 @@ public class Application extends Controller {
 			final JStravaV3 strava = new JStravaV3(request().cookies().get("AUTH_TOKEN").value());
 			final String[] types = {"distance", "altitude", "grade_smooth"}; 
 			final List<Stream> streamsAsStravaTracks = strava.findActivityStreams(id, types);
-			
-			Table<Double, Double, Double> unnested;
-			StreamsUnnested streams = new StreamsUnnested();
-			
-			for (Stream s: streamsAsStravaTracks){
-				streams.setData(s);
-			}
-			//TODO:
-			streams.getMergedStreams();
-			
-			
+
 			return streamsAsStravaTracks;
-			
 		});
 	}
 	
@@ -245,6 +238,17 @@ public class Application extends Controller {
 		}
 		
 		return streamsDataOriginal;
+	}
+	
+	private Table<Double, Double, Double> getStreamsAsTable(List<Stream> rawStreams){
+		
+		StreamsUnnested streams = new StreamsUnnested();
+		
+		for (Stream s: rawStreams){
+			streams.setData(s);
+		}
+
+		return streams.getMergedStreams();
 	}
 
 	public Result login() {

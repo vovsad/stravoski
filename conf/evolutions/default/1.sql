@@ -49,7 +49,6 @@ create table activity_model (
   has_kudoed                tinyint(1) default 0,
   downhill_distance         float,
   average_downhill_grade    integer,
-  average_downhill_2grade    integer,
   constraint uq_activity_model_map_id unique (map_id),
   constraint pk_activity_model primary key (id))
  engine=InnoDB default charset=utf8;

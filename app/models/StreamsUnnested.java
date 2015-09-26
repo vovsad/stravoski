@@ -1,8 +1,9 @@
 package models;
 
 import java.util.List;
+
 import com.google.common.collect.Table;
-import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.TreeBasedTable;
 
 import org.jstrava.entities.stream.Stream;
 
@@ -39,7 +40,7 @@ public class StreamsUnnested {
 	}
 	
 	public Table<Double, Double, Double> getMergedStreams(){
-		Table<Double, Double, Double> table = HashBasedTable.create();
+		Table<Double, Double, Double> table = TreeBasedTable.create();
 
 		for (int i = 0; i < distance.size(); i++) {
 		    table.put(distance.get(i), altitude.get(i), grade.get(i));
