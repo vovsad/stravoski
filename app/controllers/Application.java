@@ -214,7 +214,7 @@ public class Application extends Controller {
 	public List<Stream> getStream(int id) {
 		return cache.getOrElse("stream" + id, () -> {
 			final JStravaV3 strava = new JStravaV3(request().cookies().get("AUTH_TOKEN").value());
-			final String[] types = {"distance", "altitude"}; 
+			final String[] types = {"distance", "altitude", "grade_smooth"}; 
 			final List<Stream> streamsAsStravaTracks = strava.findActivityStreams(id, types);
 			
 			Table<Double, Double, Double> unnested;
