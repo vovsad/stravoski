@@ -161,6 +161,7 @@
 	   	<ul ng-repeat="activity in pagedActivities" class="list-group">
       		<li class="list-group-item">
       			<span class="badge">{{activity.distance / 1000 | number:2}} km</span>
+      			<a ng-click="modalDialogActivityDetails(activity.id)"><img ng-src="{{'http://maps.googleapis.com/maps/api/staticmap?sensor=false&size=150x150&path=weight:3|color:red|enc:' + activity.map.summary_polyline}}" style="width: 50px ; height: 50px ;"/></a>
       			{{activity.start_date | date}} <a ng-click="modalDialogActivityDetails(activity.id)">{{activity.name}}</a>
       			</li>
     	</ul>
