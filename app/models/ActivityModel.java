@@ -153,7 +153,7 @@ public class ActivityModel extends Model {
 	    a.setComment_count(comment_count);
 	    a.setAchievement_count(achievement_count);
 	    a.setPhoto_count(photo_count);
-	    a.setMap(map.getStravaPlyline());
+	    a.setMap(map.getStravaPolyline());
 	    a.setTrainer(trainer);
 	    a.setCommute(commute);
 	    a.setManual(manual);

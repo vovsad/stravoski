@@ -82,10 +82,9 @@
     	</div>
     	<div class="modal-body">
 			<div class="row">
-        		<div class="col-md-3" ng-hide="messageImage == ''" >
-          			<img ng-src="{{messageImage}}" style="width: 150px ; height: 150px ;"/>
-        		</div>
-        		<div class="col-md-9">
+					<map center="{{lat}}, {{lng}}" zoom="13">
+						<shape name="polyline" id="foo" path="{{path}}" geodesic="true" stroke-color="#00FF00" stroke-opacity="1.0" stroke-weight="2">
+					</map>
 					<table class="table table-striped table-hover ">
   						<tbody>
     						<tr>
@@ -102,7 +101,6 @@
     						</tr>
   						</tbody>
 					</table>
-        		</div>
       		</div>
 		</div>
         <div class="modal-footer">
@@ -209,7 +207,6 @@
 	    	</center>
 		  </div>
 	</div> 	
-	
 	
  	}
 </div>

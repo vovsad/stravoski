@@ -8,6 +8,7 @@ import javax.persistence.Id;
 import org.jstrava.entities.activity.Polyline;
 
 import com.avaje.ebean.Model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 public class PolylineModel extends Model {
@@ -24,7 +25,8 @@ public class PolylineModel extends Model {
 		summary_polyline = map.getSummary_polyline();
 		resource_state = map.getResource_state();
 	}
-	public Polyline getStravaPlyline() {
+	@JsonIgnore
+	public Polyline getStravaPolyline() {
 		Polyline map = new Polyline();
 		map.setId(id);
 		map.setPolyline(polyline);

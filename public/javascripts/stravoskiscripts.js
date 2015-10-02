@@ -1,10 +1,6 @@
-var app = angular.module('StravoSki', ['ui.bootstrap']);
-
-
+var app = angular.module('StravoSki', ['ui.bootstrap', 'ngMap']);
 
 app.controller("TopCtrl", function($scope, $http, $modal, $log) {
-	
-	
 	$scope.isLoadingActivities = true;
 	$scope.isUpdatingSkiTracks = false;
 	$scope.isLoadingFriends = true;
@@ -190,7 +186,6 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 	
 	
 	$scope.modalDialogActivityDetails = function (id){
-		console.log(id);
 		var a = $scope.activities.filter(function(item) {
 			  if(item.id === id) {
 				    return item;
@@ -199,7 +194,6 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 		console.log(a);
 		
 		var mapURL = 'http://maps.googleapis.com/maps/api/staticmap?sensor=false&size=150x150&path=weight:3|color:red|enc:';
-		mapURL += a.map.summary_polyline;
 		
 		var activityModalData = new Object();
 		activityModalData.moving_time = timeFromSeconds(a.moving_time);
@@ -208,6 +202,11 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 		activityModalData.distance = Math.round(a.distance/1000);
 		activityModalData.max_speed = Math.round(a.max_speed*3600/1000);
 		activityModalData.average_speed = Math.round(a.average_speed*3600/1000);
+		activityModalData.URL = mapURL += a.map.summary_polyline; 
+		activityModalData.polyline = a.map.summary_polyline;
+		activityModalData.lat = a.start_lat;
+		activityModalData.lng = a.start_lng;
+	
 		if(a.location_city != null){
 			activityModalData.location = a.location_city;
 		}else if(a.location_state != null){
@@ -217,7 +216,7 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 		}
 
 		$scope.modalTemplete = 'modalDialogActivityDetails.html';
-		$scope.modalDialog(a.name, activityModalData, mapURL);
+		$scope.modalDialog(a.name, activityModalData);
 	  };
 	  
 	$scope.modalDialogFriendCompare = function (f){
@@ -240,18 +239,33 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 		    	$scope.message = "Something goes wrong";
 		    });
 	  };
-
-
 });
-
-app.controller('ModalInstanceCtrl', function ($scope, $modalInstance, messageBody, messageTitle, messageImage) {
+	  
+app.controller('ModalInstanceCtrl', function ($scope, $modalInstance, $timeout, messageBody, messageTitle) {
 	$scope.messageBody = messageBody;
 	$scope.messageTitle = messageTitle;
-	$scope.messageImage = messageImage;
+	$scope.decodedPath = google.maps.geometry.encoding.decodePath(messageBody.polyline);
+    $scope.lat = messageBody.lat;
+	$scope.lng = messageBody.lng;
+	
+	$scope.path = [];
+	for (i =0; i < $scope.decodedPath.length; i++){
+		$scope.path[i] = [$scope.decodedPath[i].H, $scope.decodedPath[i].L];
+	}
+
+	$scope.render = true;
 	  $scope.ok = function () {
 	    $modalInstance.close('ok');
 	  };
+
+	  var marker, map; 
+	  $scope.$on('mapInitialized', function(evt, evtMap){ 
+		  map = evtMap;
+		  map.panTo(new google.maps.LatLng($scope.lat, $scope.lng));
+		  }); 
+ 
 });
+
 
 function getCookie(name) {
 	  var value = "; " + document.cookie;
