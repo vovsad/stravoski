@@ -172,6 +172,11 @@ public class Application extends Controller {
 				a.update();
 				isAnythingUpdated = true;
 			}
+			if(a.average_downhill_grade == 0){
+				a.setAverage_downhill_grade(getAverageGrade(a.id));
+				a.update();
+				isAnythingUpdated = true;
+			}
 		}
 		
 		return ok(Json.parse("{\"isAnythingUpdated\":" + isAnythingUpdated + "}"));
@@ -196,12 +201,12 @@ public class Application extends Controller {
 		
 	}
 	
-	public double getAverageGrade(int id){
+	public int getAverageGrade(int id){
 		Logger.debug("Detecting slopes for " + Long.toString(id));
 		
 		Table<Double, Double, Double> unnested = getStreamsAsTable(getStream(id));
-		Double previousAltitudePoint = 0.0, grade = 0.0;
-		int count = 0;
+		Double previousAltitudePoint = 0.0;
+		int grade = 0, count = 0;
 		for (Cell<Double, Double, Double> cell: unnested.cellSet()) {
 
 			if (cell.getColumnKey() <= previousAltitudePoint) {
@@ -212,7 +217,7 @@ public class Application extends Controller {
 			
 
 		}
-		return grade/count;
+		return Math.round(grade/count);
 	}
 
 	public List<Stream> getStream(int id) {

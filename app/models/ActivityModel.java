@@ -185,6 +185,10 @@ public class ActivityModel extends Model {
 	public void setDownhill_distance(int i) {
 		downhill_distance = i;
 	}
+	public void setAverage_downhill_grade(int i) {
+		average_downhill_grade = i;
+	}
+	
 	
 	public ZonedDateTime getStartDateAsDate() {
 		return ZonedDateTime.parse(start_date,
