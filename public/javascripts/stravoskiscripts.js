@@ -254,14 +254,14 @@ app.controller('ModalInstanceCtrl', function ($scope, $modalInstance, $timeout, 
 	for (i =0; i < $scope.decodedPath.length; i++){
 		$scope.path[i] = [$scope.decodedPath[i].H, $scope.decodedPath[i].L];
 	}
-
+	
 	$scope.render = true;
-	  $scope.ok = function () {
+	$scope.ok = function () {
 	    $modalInstance.close('ok');
 	  };
-
-	  var marker, map; 
-	  $scope.$on('mapInitialized', function(evt, evtMap){ 
+	
+	var marker, map; 
+	$scope.$on('mapInitialized', function(evt, evtMap){ 
 		  map = evtMap;
 		  map.panTo(new google.maps.LatLng($scope.lat, $scope.lng));
 		  }); 
