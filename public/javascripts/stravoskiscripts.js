@@ -252,7 +252,7 @@ app.controller('ModalInstanceCtrl', function ($scope, $modalInstance, $timeout, 
 	
 	$scope.path = [];
 	for (i =0; i < $scope.decodedPath.length; i++){
-		$scope.path[i] = [$scope.decodedPath[i].H, $scope.decodedPath[i].L];
+		$scope.path[i] = [$scope.decodedPath[i].J, $scope.decodedPath[i].M];
 	}
 	
 	$scope.render = true;
