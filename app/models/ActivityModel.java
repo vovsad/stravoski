@@ -78,6 +78,8 @@ public class ActivityModel extends Model {
     @ManyToMany(cascade = CascadeType.ALL)
     public List<SlopeModel> slopes;
     
+	public int slopes_count;
+    
     public ActivityModel() {}
     
 	public ActivityModel(Activity a) {
@@ -188,13 +190,17 @@ public class ActivityModel extends Model {
 	public void setAverage_downhill_grade(int i) {
 		average_downhill_grade = i;
 	}
-	
+	public void setSlopes_count(int slopesCount) {
+		slopes_count = slopesCount;
+	}	
 	
 	public ZonedDateTime getStartDateAsDate() {
 		return ZonedDateTime.parse(start_date,
 				DateTimeFormatter.ISO_DATE_TIME);
 		
 	}
+
+
 
 
 

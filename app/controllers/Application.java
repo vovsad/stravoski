@@ -177,6 +177,11 @@ public class Application extends Controller {
 				a.update();
 				isAnythingUpdated = true;
 			}
+			if(a.slopes_count == 0){
+				a.setSlopes_count(getSlopesCount(a.id));
+				a.update();
+				isAnythingUpdated = true;
+			}
 		}
 		
 		return ok(Json.parse("{\"isAnythingUpdated\":" + isAnythingUpdated + "}"));
@@ -202,29 +207,67 @@ public class Application extends Controller {
 	}
 	
 	public int getAverageGrade(int id){
-		Logger.debug("Detecting slopes for " + Long.toString(id));
+		Logger.debug("Calculating slopes grade " + Long.toString(id));
 		
 		Table<Double, Double, Double> unnested = getStreamsAsTable(getStream(id));
-		Double previousAltitudePoint = 0.0;
-		int grade = 0, count = 0;
+		float grade = 0; 
+		int count = 0;
 		for (Cell<Double, Double, Double> cell: unnested.cellSet()) {
 
-			if (cell.getColumnKey() <= previousAltitudePoint) {
-				grade += -cell.getValue();
+			if (cell.getValue() < 0) {
+				grade += Math.abs(cell.getValue());
 				count++;
 			}
-			previousAltitudePoint = cell.getColumnKey();
-			
 
 		}
 		return Math.round(grade/count);
 	}
+	
+	public int getSlopesCount(int id){
+		Logger.debug("Detecting slopes for " + Long.toString(id));
+		final int POINTS_TO_NAME_IT_DESCENT_OR_ASCENT = 2;
+		
+		Table<Double, Double, Double> unnested = getStreamsAsTable(getStream(id));
+		Double previousAltitudePoint = 0.0;
+		int count = 0, countDescents = 0, countAscents = 0;
+		boolean thisDescentIsNOTCountedAlready = true, thisAscentIsNOTCountedAlready = true;
+		for (Cell<Double, Double, Double> cell: unnested.cellSet()) {
+			
+			if (cell.getColumnKey() <= previousAltitudePoint) {
+				countDescents++;
+			}
+			if (cell.getColumnKey() >= previousAltitudePoint) {
+				countAscents++;
+			}
+			
+			if(countDescents == POINTS_TO_NAME_IT_DESCENT_OR_ASCENT &&
+					thisDescentIsNOTCountedAlready){
+				count++;
+				countAscents = 0;
+				thisDescentIsNOTCountedAlready = false;
+				thisAscentIsNOTCountedAlready = true;
+			}
+			
+			if(countAscents == POINTS_TO_NAME_IT_DESCENT_OR_ASCENT && 
+					thisAscentIsNOTCountedAlready){
+				countDescents = 0;
+				thisDescentIsNOTCountedAlready = true;
+				thisAscentIsNOTCountedAlready = false;
+			}
+		
+			previousAltitudePoint = cell.getColumnKey();
+		}
+		return count;
+	}
+
 
 	public List<Stream> getStream(int id) {
 		return cache.getOrElse("stream" + id, () -> {
 			final JStravaV3 strava = new JStravaV3(request().cookies().get("AUTH_TOKEN").value());
-			final String[] types = {"distance", "altitude", "grade_smooth"}; 
-			final List<Stream> streamsAsStravaTracks = strava.findActivityStreams(id, types);
+			final String[] types = {"distance", "altitude", "grade_smooth"};
+			final String resolution = "low";
+			final String series_type = "distance";
+			final List<Stream> streamsAsStravaTracks = strava.findActivityStreams(id, types, resolution, series_type);
 
 			return streamsAsStravaTracks;
 		});

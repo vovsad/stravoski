@@ -207,6 +207,7 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 		activityModalData.lat = a.start_lat;
 		activityModalData.lng = a.start_lng;
 		activityModalData.average_downhill_grade = a.average_downhill_grade;
+		activityModalData.slopes_count = a.slopes_count;
 	
 		if(a.location_city != null){
 			activityModalData.location = a.location_city;

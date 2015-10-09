@@ -49,6 +49,7 @@ create table activity_model (
   has_kudoed                tinyint(1) default 0,
   downhill_distance         float,
   average_downhill_grade    integer,
+  slopes_count		    integer,
   constraint uq_activity_model_map_id unique (map_id),
   constraint pk_activity_model primary key (id))
  engine=InnoDB default charset=utf8;
@@ -100,7 +101,7 @@ create table activity_model_slope_model (
   constraint pk_activity_model_slope_model primary key (activity_model_id, slope_model_id))
  engine=InnoDB default charset=utf8;
 
-alter table activity_model add constraint fk_activity_model_map_1 foreign key (map_id) references polyline_model (id) on delete restrict on update restrict;
+alter table activity_model add constraint fk_activity_model_map_1 foreign key (map_id) references polyline_model (id) on delete cascade on update cascade;
 create index ix_activity_model_map_1 on activity_model (map_id);
 
 
