@@ -191,7 +191,6 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 				    return item;
 				  }
 				})[0];
-		console.log(a);
 		
 		var mapURL = 'http://maps.googleapis.com/maps/api/staticmap?sensor=false&size=150x150&path=weight:3|color:red|enc:';
 		
@@ -211,7 +210,7 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 		var decodedPath = google.maps.geometry.encoding.decodePath(a.map.summary_polyline);
 		activityModalData.path = [];
 		for (i =0; i < decodedPath.length; i++){
-			activityModalData.path[i] = [decodedPath[i].J, decodedPath[i].M];
+			activityModalData.path[i] = [decodedPath[i].lat(), decodedPath[i].lng()];
 		}
 	
 		if(a.location_city != null){
