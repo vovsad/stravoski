@@ -5,6 +5,7 @@
 <html lang="en">
     <head>
         <title>@title</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
         <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular.js"></script>
@@ -38,7 +39,7 @@
 		      <ul class="nav navbar-nav navbar-right" ng-show="showTopMenu">
 		        <li><a href="https://www.strava.com/" target="new">Strava.com</a></li>
 		        <li class="dropdown">
-		          <img class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" ng-src="{{statistics.profile_medium}}"/>
+		          <img class="dropdown-toggle img-rounded" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" ng-src="{{statistics.profile_medium}}"/>
 		          <ul class="dropdown-menu">
 		            <li><a href="/logout">Logout</a></li>
 		            <li><a href="/removeme">Remove my account</a></li>
@@ -59,13 +60,13 @@
     
     <div id="footer">
       <div class="container">
-      	<div class="col-xs-2">
+      	<div class="col-md-2">
 	      	<h4 class="footertext">About</h4>
 	      	<p><a ng-click="contactText = false;issueText = false;aboutText = true;">Project</a></p>
 			<p><a ng-click="aboutText = false;issueText = false;contactText = true;">Contact Us</a></p>
 	      	<p><a ng-click="aboutText = false;contactText = false;issueText = true;">Report an issue</a></p>
       	</div>
-      	<div class="col-xs-10">
+      	<div class="col-md-10">
       		<p ng-show="aboutText" class="footertext">STRAVOSKI is Web client for <a href="strava.com">Strava</a> users with dedication to alpine skiing. Strava itself is wonderful application but generally targeting to cyclists and runners. Here is an attempt to utilize Strava potential for alpine skiing. This app works with Strava API and collects activities marked as Alpine Ski. Collected activities are analyzed and lifts are deducted from total distance. Deduction is done on altitude analysis so it may be not really accurate now.</p>
       		<p ng-show="aboutText" class="footertext">All trademarks displayed are property of their respective owners</p>
       		<p ng-show="aboutText" class="footertext">STRAVOSKI is an <a href="https://github.com/vovsad/stravoski">open source project</a> by <a href="info@@stravoski.com">Volodymyr Sadovyy</a></p>
