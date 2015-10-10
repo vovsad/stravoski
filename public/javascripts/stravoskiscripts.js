@@ -203,11 +203,16 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 		activityModalData.max_speed = Math.round(a.max_speed*3600/1000);
 		activityModalData.average_speed = Math.round(a.average_speed*3600/1000);
 		activityModalData.URL = mapURL += a.map.summary_polyline; 
-		activityModalData.polyline = a.map.summary_polyline;
 		activityModalData.lat = a.start_lat;
 		activityModalData.lng = a.start_lng;
 		activityModalData.average_downhill_grade = a.average_downhill_grade;
 		activityModalData.slopes_count = a.slopes_count;
+		
+		var decodedPath = google.maps.geometry.encoding.decodePath(a.map.summary_polyline);
+		activityModalData.path = [];
+		for (i =0; i < decodedPath.length; i++){
+			activityModalData.path[i] = [decodedPath[i].J, decodedPath[i].M];
+		}
 	
 		if(a.location_city != null){
 			activityModalData.location = a.location_city;
@@ -246,25 +251,17 @@ app.controller("TopCtrl", function($scope, $http, $modal, $log) {
 app.controller('ModalInstanceCtrl', function ($scope, $modalInstance, $timeout, messageBody, messageTitle) {
 	$scope.messageBody = messageBody;
 	$scope.messageTitle = messageTitle;
-	$scope.decodedPath = google.maps.geometry.encoding.decodePath(messageBody.polyline);
-    $scope.lat = messageBody.lat;
-	$scope.lng = messageBody.lng;
-	
-	$scope.path = [];
-	for (i =0; i < $scope.decodedPath.length; i++){
-		$scope.path[i] = [$scope.decodedPath[i].J, $scope.decodedPath[i].M];
-	}
-	
+		
 	$scope.render = true;
 	$scope.ok = function () {
 	    $modalInstance.close('ok');
 	  };
 	
-	var marker, map; 
+	var map; 
 	$scope.$on('mapInitialized', function(evt, evtMap){ 
 		  map = evtMap;
-		  map.panTo(new google.maps.LatLng($scope.lat, $scope.lng));
-		  }); 
+		  map.panTo(new google.maps.LatLng(messageBody.lat, messageBody.lng));
+		  });
  
 });
 
