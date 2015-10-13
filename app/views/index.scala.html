@@ -81,7 +81,7 @@
 			<button type="button" class="close" data-dismiss="modal" aria-label="Close" ng-click="ok()"><span aria-hidden="true">&times;</span></button>
 	        <h4 class="modal-title">{{messageTitle}}</h3>
     	</div>
-    	<div class="modal-body">
+    	<div class="modal-body" style="overflow-y: scroll; max-height:450px;">
 			<div class="row">
 					<map center="{{messageBody.lat}}, {{messageBody.lng}}" zoom="13">
 						<shape name="polyline" id="foo" path="{{messageBody.path}}" geodesic="true" stroke-color="#00FF00" stroke-opacity="1.0" stroke-weight="2">
