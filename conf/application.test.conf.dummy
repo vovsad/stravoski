@@ -1,7 +1,0 @@
-include "application.conf"
-
-
-db.default.driver=com.mysql.jdbc.Driver
-db.default.url="jdbc:mysql://host/stravoski?characterEncoding=UTF-8"
-db.default.username=user
-db.default.password="pass"
